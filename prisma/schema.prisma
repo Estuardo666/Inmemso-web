@@ -134,9 +134,9 @@ model Session {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   
   user      User     @relation(fields: [parentId], references: [id], onDelete: Cascade)
-  parentId  String   @map("_parent_id") @db.Uuid // <-- UUID AQUÍ TAMBIÉN
+  parentId  String   @map("_parent_id") @db.Uuid
   
-  token     String
+  token     String?
   expiresAt DateTime @map("expires_at")
   order     Int?     @map("_order")
   
