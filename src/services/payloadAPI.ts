@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Payload CMS API configuration
-const API_BASE_URL = import.meta.env.VITE_PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_PAYLOAD_URL || '';
 const API_FULL_URL = `${API_BASE_URL}/api`;
 
 const api = axios.create({
@@ -13,14 +13,14 @@ const api = axios.create({
 });
 
 // Add authentication header if token is available
-if (import.meta.env.VITE_PAYLOAD_TOKEN) {
-  api.defaults.headers.common['Authorization'] = `Bearer ${import.meta.env.VITE_PAYLOAD_TOKEN}`;
+if (process.env.NEXT_PUBLIC_PAYLOAD_TOKEN) {
+  api.defaults.headers.common['Authorization'] = `Bearer ${process.env.NEXT_PUBLIC_PAYLOAD_TOKEN}`;
 }
 
 // Request interceptor for adding auth token
 api.interceptors.request.use(
   (config) => {
-    const token = import.meta.env.VITE_PAYLOAD_TOKEN;
+    const token = process.env.NEXT_PUBLIC_PAYLOAD_TOKEN;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

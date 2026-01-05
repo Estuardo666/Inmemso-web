@@ -6,10 +6,7 @@ Inmemso Architecture is a modern React portfolio website for an architecture fir
 ## Architecture & Data Flow
 
 ### Frontend-Backend Integration Pattern
-- **Primary data source**: Payload CMS API (`VITE_PUBLIC_PAYLOAD_URL` defaults to `http://localhost:3000/api`)
-- **Fallback mechanism**: Mock data in [src/services/mockData.ts](src/services/mockData.ts)
-- **Data fetching**: Custom hooks in [src/hooks/usePayloadData.ts](src/hooks/usePayloadData.ts) wrap Payload API calls with automatic error recovery
-- **API client**: [src/services/payloadAPI.ts](src/services/payloadAPI.ts) uses Axios with 3-second timeout and bearer token authentication
+- **Primary data source**: Payload CMS API 
 
 **Key insight**: The system never blocks - if Payload CMS isn't running or times out, components automatically render mock data with zero UI disruption.
 

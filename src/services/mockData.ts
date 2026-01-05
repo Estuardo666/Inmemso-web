@@ -136,7 +136,7 @@ export const mockTestimonials: Testimonial[] = [
  */
 export async function checkPayloadAPI(): Promise<boolean> {
   try {
-    const url = import.meta.env.VITE_PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
+    const url = process.env.NEXT_PUBLIC_PAYLOAD_URL || 'http://localhost:3000';
     const response = await fetch(`${url}/api/health`, { 
       method: 'GET',
       mode: 'cors',

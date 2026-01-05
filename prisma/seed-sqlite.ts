@@ -5,9 +5,7 @@
 
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient({
-  adapter: null, // Para SQLite, no se necesita adapter en Prisma 7
-});
+const prisma = new PrismaClient();
 
 /**
  * Limpia la base de datos antes de sembrar

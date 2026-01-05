@@ -6,7 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
+  relationMode = "prisma"         // Requerido para PostgreSQL en Neon
 }
 
 // Model: User - Usuarios del CMS con autenticación

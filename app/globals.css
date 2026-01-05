@@ -1,0 +1,96 @@
+/* Importar configuración de Tailwind CSS v4 */
+@import "tailwindcss";
+
+/* Configuración personalizada para Tailwind v4 */
+@config "../tailwind.config.js";
+
+/* Custom Base Styles */
+@layer base {
+  body {
+    @apply bg-primary text-white antialiased overflow-x-hidden;
+    font-family: 'Manrope', sans-serif;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-secondary;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-accent rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-[#d4a735];
+  }
+}
+
+/* Custom Components */
+@layer components {
+  .glass-panel {
+    @apply bg-primary/40 backdrop-blur-2xl border border-white/15 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)];
+  }
+
+  .glass-btn {
+    @apply bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl transition-all duration-500 relative overflow-hidden;
+  }
+
+  .glass-btn:hover {
+    @apply bg-white/15 border-white/40 -translate-y-0.5;
+  }
+
+  .glass-btn::before {
+    content: '';
+    @apply absolute top-0 left-[-100%] w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-all duration-500;
+  }
+
+  .glass-btn:hover::before {
+    @apply left-[100%];
+  }
+
+  .glass-btn.gold {
+    @apply bg-accent/90 border-accent text-white;
+  }
+
+  .glass-btn.gold:hover {
+    @apply bg-accent border-white;
+  }
+}
+
+/* Custom Utilities */
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r;
+  }
+
+  .glass-blur {
+    @apply backdrop-blur-xl bg-white/5 border border-white/10;
+  }
+}
+
+/* Inmemso Brand Colors - Extended */
+:root {
+  --color-primary: #0c3a63;
+  --color-secondary: #072a4a;
+  --color-accent: #b89026;
+  --color-concrete: #e2e8f0;
+  --color-glass: rgba(255, 255, 255, 0.1);
+}
+
+/* Liquid Glass iOS 26 Animation */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.glass-btn::before {
+  animation: shimmer 3s infinite;
+}
