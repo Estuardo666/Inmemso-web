@@ -163,8 +163,9 @@ async function seedDatabase() {
       id: crypto.randomUUID(),
       name: 'Administrador',
       email: 'admin@inmemso.com',
-      password: 'admin',
       role: 'admin',
+      hash: 'hashed_admin_password',  // En producción, usar bcrypt
+      salt: 'salt_value',
       createdAt: new Date(),
       updatedAt: new Date(),
     },

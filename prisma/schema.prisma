@@ -8,16 +8,27 @@ datasource db {
 }
 
 model User {
-  id        String   @id
-  name      String
-  role      String   @default("viewer")
-  email     String   @unique
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime
-  sessions  Session[]
-  preferences PayloadPreference[] @relation("UserPreferences")
+  id                      String    @id @default(cuid())
+  name                    String?
+  email                   String    @unique
+  role                    String    @default("user")
+  
+  // MAPEOS DE FECHAS (Crucial para Payload)
+  createdAt               DateTime  @default(now()) @map("created_at")
+  updatedAt               DateTime  @updatedAt @map("updated_at")
+  
+  // Campos de Auth de Payload
+  resetPasswordToken      String?   @map("reset_password_token")
+  resetPasswordExpiration DateTime? @map("reset_password_expiration")
+  salt                    String?
+  hash                    String?
+  loginAttempts           Int?      @default(0) @map("login_attempts")
+  lockUntil               DateTime? @map("lock_until")
 
+  // Relaciones
+  sessions                Session[]
+  preferences             PayloadPreference[] @relation("UserPreferences")
+  
   @@map("users")
 }
 
@@ -96,18 +107,17 @@ model project_technologies {
 model Session {
   id        String   @id @default(cuid())
   
-  // Relación con User
   user      User     @relation(fields: [parentId], references: [id], onDelete: Cascade)
   parentId  String   @map("_parent_id")
   
   token     String
-  expiresAt DateTime
   
-  // Campos de sistema obligatorios para Payload Arrays/Joins
+  // MAPEOS DE FECHAS Y CAMPOS (Crucial)
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
   order     Int?     @map("_order")
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
   @@map("users_sessions")
 }

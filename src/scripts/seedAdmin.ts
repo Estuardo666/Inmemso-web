@@ -34,7 +34,8 @@ async function createAdminUser() {
         id: crypto.randomUUID(),
         name: 'Administrador Inmemso',
         email: 'admin@inmemso.com',
-        password: process.env.ADMIN_PASSWORD ?? 'admin',
+        hash: 'hashed_password',  // En producción, usar bcrypt
+        salt: 'salt_value',
         role: 'admin',
         createdAt: new Date(),
         updatedAt: new Date(),
