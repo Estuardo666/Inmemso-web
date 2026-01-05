@@ -112,7 +112,47 @@ if (isVercel && databaseUrl) {
 }
 
 const vercelURL = process.env.VERCEL_URL
+const vercelProjectProductionURL = process.env.VERCEL_PROJECT_PRODUCTION_URL
+const nextPublicServerURL = process.env.NEXT_PUBLIC_SERVER_URL
 const inferredServerURL = vercelURL ? `https://${vercelURL}` : undefined
+
+// Determinar la URL del servidor para Payload
+const payloadServerURL =
+	nextPublicServerURL ||
+	(vercelProjectProductionURL ? `https://${vercelProjectProductionURL}` : undefined) ||
+	inferredServerURL ||
+	'http://localhost:3000'
+
+// Construir lista dinámica de origins permitidos para CORS y CSRF
+const getAllowedOrigins = (): string[] => {
+	const origins = [
+		'http://localhost:3000',
+		'http://localhost:3001',
+		'http://127.0.0.1:3000',
+	]
+
+	// Agregar URLs de Vercel dinámicamente
+	if (vercelURL && !origins.includes(`https://${vercelURL}`)) {
+		origins.push(`https://${vercelURL}`)
+	}
+
+	// Agregar URL de producción si está disponible
+	if (vercelProjectProductionURL && !origins.includes(`https://${vercelProjectProductionURL}`)) {
+		origins.push(`https://${vercelProjectProductionURL}`)
+	}
+
+	// Agregar dominios personalizados
+	if (nextPublicServerURL && !origins.includes(nextPublicServerURL)) {
+		origins.push(nextPublicServerURL)
+	}
+
+	// Hardcodear el dominio de producción conocido
+	if (!origins.includes('https://inmemso-web.vercel.app')) {
+		origins.push('https://inmemso-web.vercel.app')
+	}
+
+	return origins
+}
 
 if (process.env.NODE_ENV === 'production') {
 	if (!payloadSecret) {
@@ -139,25 +179,9 @@ export default buildConfig({
 			})
 		}],
 	},
-	serverURL:
-		process.env.PAYLOAD_PUBLIC_SERVER_URL ||
-		process.env.NEXT_PUBLIC_SITE_URL ||
-		inferredServerURL ||
-		'http://localhost:3000',
-	csrf: [
-		'http://localhost:3000',
-		'http://localhost:3001',
-		process.env.PAYLOAD_PUBLIC_SERVER_URL,
-		process.env.NEXT_PUBLIC_SITE_URL,
-		inferredServerURL,
-	].filter(Boolean) as string[],
-	cors: [
-		'http://localhost:3000',
-		'http://localhost:3001',
-		process.env.PAYLOAD_PUBLIC_SERVER_URL,
-		process.env.NEXT_PUBLIC_SITE_URL,
-		inferredServerURL,
-	].filter(Boolean) as string[],
+	serverURL: payloadServerURL,
+	csrf: getAllowedOrigins(),
+	cors: getAllowedOrigins(),
 	admin: {
 		user: 'users',
 		meta: {
@@ -253,9 +277,11 @@ export default buildConfig({
 		push: isProd || process.env.PAYLOAD_DB_PUSH === 'true',
 		pool: {
 			connectionString: databaseUrl,
-			max: isVercel ? 1 : 5,
+			// Payload Admin/API can issue multiple queries concurrently.
+			// Using max=1 on serverless often causes pg-pool wait timeouts.
+			max: isVercel ? 3 : 5,
 			// Help serverless environments survive Neon cold starts / DNS / TLS handshakes.
-			connectionTimeoutMillis: isVercel ? 60_000 : 30_000,
+			connectionTimeoutMillis: isVercel ? 120_000 : 30_000,
 			idleTimeoutMillis: 30_000,
 			allowExitOnIdle: true,
 			keepAlive: true,
