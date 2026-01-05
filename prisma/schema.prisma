@@ -1,153 +1,92 @@
-// Schema Prisma para SQLite (desarrollo) / PostgreSQL (producción)
-// Inmemso Architecture CMS - SQL-only schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  relationMode = "prisma"         // Requerido para PostgreSQL en Neon
+  provider     = "postgresql"
+  relationMode = "prisma"
 }
 
-// NOTE: Payload (db-postgres) is the runtime schema owner.
-// Prisma is used for tooling / optional access. These models mirror the actual
-// Payload Postgres schema as generated in `src/migrations/20260105_114119.ts`.
-
-// Model: User - Usuarios del CMS con autenticación (Payload)
 model User {
-  id                     Int       @id @default(autoincrement())
-  name                   String
-  role                   String?   @default("viewer")
-  updatedAt              DateTime  @default(now()) @map("updated_at") @db.Timestamptz(3)
-  createdAt              DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  email                  String    @unique
-  resetPasswordToken     String?   @map("reset_password_token")
-  resetPasswordExpiration DateTime? @map("reset_password_expiration") @db.Timestamptz(3)
-  salt                   String?
-  hash                   String?
-  loginAttempts          Decimal?  @default(0) @map("login_attempts")
-  lockUntil              DateTime? @map("lock_until") @db.Timestamptz(3)
-
-  sessions               UserSession[]
+  id        String   @id
+  name      String
+  role      String   @default("viewer")
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime
 
   @@map("users")
 }
 
-// Payload stores auth sessions as an array table: users -> users_sessions
-model UserSession {
-  id        String    @id @db.VarChar
-  order     Int       @map("_order")
-  userId    Int       @map("_parent_id")
-  createdAt DateTime? @map("created_at") @db.Timestamptz(3)
-  expiresAt DateTime  @map("expires_at") @db.Timestamptz(3)
-
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([order], map: "users_sessions_order_idx")
-  @@index([userId], map: "users_sessions_parent_id_idx")
-  @@map("users_sessions")
-}
-
-// Model: Project - Proyectos de arquitectura
 model Project {
-  id              Int       @id @default(autoincrement())
+  id              String   @id
   title           String
-  slug            String    @unique
+  slug            String   @unique
   description     String
-  content         Json
-  featuredImageId Int?      @map("featured_image_id")
+  content         String
+  featuredImageId String?
   year            String?
-  status          String?   @default("draft")
-  updatedAt       DateTime  @default(now()) @map("updated_at") @db.Timestamptz(3)
-  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-
-  featuredImage   Media?    @relation(fields: [featuredImageId], references: [id], onDelete: SetNull)
-  services        ProjectService[]
-  technologies    ProjectTechnology[]
+  status          String   @default("draft")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime
+  featuredImage   Media?   @relation(fields: [featuredImageId], references: [id], onDelete: SetNull)
 
   @@map("projects")
 }
 
-// Model: Service - Servicios que ofrece la empresa
 model Service {
-  id              Int       @id @default(autoincrement())
+  id              String   @id
   title           String
-  slug            String    @unique
+  slug            String   @unique
   description     String
-  content         Json?
+  content         String?
   icon            String?
-  featuredImageId Int?      @map("featured_image_id")
-  updatedAt       DateTime  @default(now()) @map("updated_at") @db.Timestamptz(3)
-  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-
-  featuredImage   Media?    @relation(fields: [featuredImageId], references: [id], onDelete: SetNull)
+  featuredImageId String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime
+  featuredImage   Media?   @relation(fields: [featuredImageId], references: [id], onDelete: SetNull)
 
   @@map("services")
 }
 
-// Model: Media - Archivos multimedia subidos al CMS
 model Media {
-  id        Int      @id @default(autoincrement())
+  id        String    @id
   alt       String
-
+  url       String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime
   projects  Project[]
   services  Service[]
-
-  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz(3)
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
   @@map("media")
 }
 
-// Model: Testimonial - Testimonios de clientes (según payloadData.ts)
 model Testimonial {
-  id        Int      @id @default(autoincrement())
+  id        String   @id
   name      String
   position  String
   company   String
   quote     String
   image     String?
-
-  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz(3)
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  createdAt DateTime @default(now())
+  updatedAt DateTime
 
   @@map("testimonials")
 }
 
-// Payload array table: projects -> projects_services
-model ProjectService {
-  id        String   @id @db.VarChar
-  order     Int      @map("_order")
-  projectId Int      @map("_parent_id")
-  service   String?
+model project_services {
+  id        String @id
+  projectId String
+  service   String
 
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
-  @@index([order], map: "projects_services_order_idx")
-  @@index([projectId], map: "projects_services_parent_id_idx")
-  @@map("projects_services")
+  @@unique([projectId, service])
 }
 
-// Payload array table: projects -> projects_technologies
-model ProjectTechnology {
-  id          String   @id @db.VarChar
-  order       Int      @map("_order")
-  projectId   Int      @map("_parent_id")
-  technology  String?
+model project_technologies {
+  id         String @id
+  projectId  String
+  technology String
 
-  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
-  @@index([order], map: "projects_technologies_order_idx")
-  @@index([projectId], map: "projects_technologies_parent_id_idx")
-  @@map("projects_technologies")
+  @@unique([projectId, technology])
 }
-
-// NOTAS DE MIGRACIÓN:
-// 1. _id de MongoDB convertido a id con @id @default(uuid())
-// 2. Arrays de Payload (services, technologies) convertidos a tablas intermedias
-// 3. Relaciones @relation establecidas entre modelos
-// 4. Campos richText de Payload se almacenan como String
-// 5. Campos de upload (featuredImage) se almacenan como IDs referenciados
-// 6. Se añadieron campos createdAt y updatedAt para control de versiones
-// 7. Todos los slugs son únicos (@unique) como en el original

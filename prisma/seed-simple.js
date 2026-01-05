@@ -137,8 +137,8 @@ async function main() {
   try {
     // Limpiar base de datos
     console.log('🗑️  Limpiando base de datos...');
-    await prisma.projectTechnology.deleteMany();
-    await prisma.projectService.deleteMany();
+    await prisma.project_technologies.deleteMany();
+    await prisma.project_services.deleteMany();
     await prisma.testimonial.deleteMany();
     await prisma.project.deleteMany();
     await prisma.service.deleteMany();
@@ -184,11 +184,11 @@ async function main() {
     // Insertar relaciones
     console.log('\n🔗 Insertando relaciones...');
     for (const rel of projectServices) {
-      await prisma.projectService.create({ data: rel });
+      await prisma.project_services.create({ data: rel });
       console.log(`  ✅ Proyecto ${rel.projectId} -> Servicio ${rel.service}`);
     }
     for (const rel of projectTechnologies) {
-      await prisma.projectTechnology.create({ data: rel });
+      await prisma.project_technologies.create({ data: rel });
       console.log(`  ✅ Proyecto ${rel.projectId} -> Tecnología ${rel.technology}`);
     }
 

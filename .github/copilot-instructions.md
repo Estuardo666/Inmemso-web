@@ -10,12 +10,11 @@ Inmemso Architecture is a modern React portfolio website for an architecture fir
 
 **Key insight**: The system never blocks - if Payload CMS isn't running or times out, components automatically render mock data with zero UI disruption.
 
-### Database (SQL-Only)
+### Database
 - **Development**: SQLite (file-based at `dev.db`)
 - **Production**: PostgreSQL (configurable via `DATABASE_URL`)
 - **ORM**: Prisma with schema at [prisma/schema.prisma](prisma/schema.prisma)
 - **Migrations**: Auto-generated in `prisma/migrations/` - use `npx prisma migrate dev` or `npx prisma db push`
-- **⚠️ MongoDB has been removed** - project is standardized on SQL databases only
 
 ### Collections in Payload CMS
 - **users**: User authentication with roles (admin, editor, viewer)

@@ -16,8 +16,8 @@ async function cleanDatabase() {
   
   try {
     // Eliminar en orden inverso para respetar restricciones de clave foránea
-    await prisma.projectTechnology.deleteMany();
-    await prisma.projectService.deleteMany();
+    await prisma.project_technologies.deleteMany();
+    await prisma.project_services.deleteMany();
     await prisma.testimonial.deleteMany();
     await prisma.project.deleteMany();
     await prisma.service.deleteMany();
@@ -108,6 +108,7 @@ const mockTestimonials = [
 function convertMockToPrisma() {
   // Servicios
   const services = mockServices.map(service => ({
+    id: service.id,
     title: service.title,
     slug: service.title.toLowerCase().replace(/\s+/g, '-'),
     description: service.description,
@@ -120,6 +121,7 @@ function convertMockToPrisma() {
 
   // Proyectos
   const projects = mockProjects.map(project => ({
+    id: project.id,
     title: project.title,
     slug: project.title.toLowerCase().replace(/\s+/g, '-'),
     description: project.description,
@@ -133,6 +135,7 @@ function convertMockToPrisma() {
 
   // Testimonios
   const testimonials = mockTestimonials.map(testimonial => ({
+    id: testimonial.id,
     name: testimonial.name,
     position: testimonial.position,
     company: testimonial.company,
@@ -157,8 +160,10 @@ async function seedDatabase() {
   console.log('👤 Insertando usuario admin...');
   await prisma.user.create({
     data: {
+      id: crypto.randomUUID(),
       name: 'Administrador',
       email: 'admin@inmemso.com',
+      password: 'admin',
       role: 'admin',
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -179,7 +184,7 @@ async function seedDatabase() {
 
   // Insertar proyectos
   console.log('\n🏗️  Insertando proyectos...');
-  const createdProjects: Array<{ id: number; title: string }> = [];
+  const createdProjects: Array<{ id: string; title: string }> = [];
   for (const project of projects) {
     try {
       const created = await prisma.project.create({ data: project });
@@ -205,18 +210,16 @@ async function seedDatabase() {
   console.log('\n🔗 Insertando arrays de Proyecto (services/technologies)...');
   for (const { id: projectId, title } of createdProjects) {
     try {
-      await prisma.projectService.create({
+      await prisma.project_services.create({
         data: {
           id: crypto.randomUUID(),
-          order: 0,
           projectId,
           service: 'Servicio de ejemplo',
         },
       });
-      await prisma.projectTechnology.create({
+      await prisma.project_technologies.create({
         data: {
           id: crypto.randomUUID(),
-          order: 0,
           projectId,
           technology: 'Tecnología de ejemplo',
         },
@@ -245,8 +248,8 @@ async function main() {
     const serviceCount = await prisma.service.count();
     const projectCount = await prisma.project.count();
     const testimonialCount = await prisma.testimonial.count();
-    const projectServiceCount = await prisma.projectService.count();
-    const projectTechnologyCount = await prisma.projectTechnology.count();
+    const projectServiceCount = await prisma.project_services.count();
+    const projectTechnologyCount = await prisma.project_technologies.count();
 
     console.log(`  - Usuarios: ${userCount}`);
     console.log(`  - Servicios: ${serviceCount}`);
