@@ -195,11 +195,6 @@ export default buildConfig({
 			auth: true,
 			fields: [
 				{
-					name: 'id',
-					type: 'text',
-					required: true,
-				},
-				{
 					name: 'name',
 					type: 'text',
 					required: true,
@@ -218,7 +213,6 @@ export default buildConfig({
 				read: () => true,
 			},
 			fields: [
-				{ name: 'id', type: 'text', required: true },
 				{ name: 'title', type: 'text', required: true },
 				{ name: 'slug', type: 'text', required: true, unique: true },
 				{ name: 'description', type: 'textarea', required: true },
@@ -249,7 +243,6 @@ export default buildConfig({
 				read: () => true,
 			},
 			fields: [
-				{ name: 'id', type: 'text', required: true },
 				{ name: 'title', type: 'text', required: true },
 				{ name: 'slug', type: 'text', required: true, unique: true },
 				{ name: 'description', type: 'textarea', required: true },
@@ -264,7 +257,6 @@ export default buildConfig({
 				read: () => true,
 			},
 			fields: [
-				{ name: 'id', type: 'text', required: true },
 				{ name: 'alt', type: 'text', required: true },
 			],
 		},
@@ -274,7 +266,6 @@ export default buildConfig({
 				read: () => true,
 			},
 			fields: [
-				{ name: 'id', type: 'text', required: true },
 				{ name: 'name', type: 'text', required: true },
 				{ name: 'position', type: 'text', required: true },
 				{ name: 'company', type: 'text', required: true },
@@ -285,6 +276,7 @@ export default buildConfig({
 	],
 	editor: lexicalEditor({}),
 	db: postgresAdapter({
+		idType: 'uuid',
 		push: isProd || process.env.PAYLOAD_DB_PUSH === 'true',
 		pool: {
 			connectionString: databaseUrl,
