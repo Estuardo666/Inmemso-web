@@ -16,8 +16,8 @@ async function cleanDatabase() {
   
   try {
     // Eliminar en orden inverso para respetar restricciones de clave foránea
-    await prisma.project_technologies.deleteMany();
-    await prisma.project_services.deleteMany();
+    await prisma.projectTechnology.deleteMany();
+    await prisma.projectService.deleteMany();
     await prisma.testimonial.deleteMany();
     await prisma.project.deleteMany();
     await prisma.service.deleteMany();
@@ -211,18 +211,20 @@ async function seedDatabase() {
   console.log('\n🔗 Insertando arrays de Proyecto (services/technologies)...');
   for (const { id: projectId, title } of createdProjects) {
     try {
-      await prisma.project_services.create({
+      await prisma.projectService.create({
         data: {
           id: crypto.randomUUID(),
-          projectId,
+          parentId: projectId,
           service: 'Servicio de ejemplo',
+          order: 0,
         },
       });
-      await prisma.project_technologies.create({
+      await prisma.projectTechnology.create({
         data: {
           id: crypto.randomUUID(),
-          projectId,
+          parentId: projectId,
           technology: 'Tecnología de ejemplo',
+          order: 0,
         },
       });
       console.log(`  ✅ Arrays creados para: ${title}`);
@@ -249,8 +251,8 @@ async function main() {
     const serviceCount = await prisma.service.count();
     const projectCount = await prisma.project.count();
     const testimonialCount = await prisma.testimonial.count();
-    const projectServiceCount = await prisma.project_services.count();
-    const projectTechnologyCount = await prisma.project_technologies.count();
+    const projectServiceCount = await prisma.projectService.count();
+    const projectTechnologyCount = await prisma.projectTechnology.count();
 
     console.log(`  - Usuarios: ${userCount}`);
     console.log(`  - Servicios: ${serviceCount}`);

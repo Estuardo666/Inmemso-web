@@ -44,6 +44,10 @@ model Project {
   createdAt       DateTime @default(now())
   updatedAt       DateTime
   featuredImage   Media?   @relation(fields: [featuredImageId], references: [id], onDelete: SetNull)
+  
+  // Relaciones inversas para arrays de Payload
+  servicesList     ProjectService[]
+  technologiesList ProjectTechnology[]
 
   @@map("projects")
 }
@@ -88,20 +92,36 @@ model Testimonial {
   @@map("testimonials")
 }
 
-model project_services {
-  id        String @id @default(cuid())
-  projectId String
-  service   String
+model ProjectService {
+  id        String  @id @default(cuid())
+  
+  // Relación con el padre (Project)
+  project   Project @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  parentId  String  @map("_parent_id")
+  
+  // El campo de texto dentro del array
+  service   String?
+  
+  // Ordenamiento de Payload
+  order     Int?    @map("_order")
 
-  @@unique([projectId, service])
+  @@map("projects_services")
 }
 
-model project_technologies {
-  id         String @id @default(cuid())
-  projectId  String
-  technology String
+model ProjectTechnology {
+  id         String  @id @default(cuid())
+  
+  // Relación con el padre (Project)
+  project    Project @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  parentId   String  @map("_parent_id")
+  
+  // El campo de texto dentro del array
+  technology String?
+  
+  // Ordenamiento de Payload
+  order      Int?    @map("_order")
 
-  @@unique([projectId, technology])
+  @@map("projects_technologies")
 }
 
 model Session {
