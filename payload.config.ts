@@ -61,16 +61,56 @@ function getDatabaseUrl(): string | undefined {
 	return `postgresql://${auth}@${hostPort}/${database}?sslmode=${encodeURIComponent(sslmode)}`
 }
 
+function normalizeDatabaseUrl(url: string): string {
+	try {
+		const parsed = new URL(url)
+		const isPoolerHost = parsed.host.includes('-pooler.')
+		if (isPoolerHost) {
+			if (!parsed.searchParams.has('pgbouncer')) parsed.searchParams.set('pgbouncer', 'true')
+			if (!parsed.searchParams.has('connection_limit')) parsed.searchParams.set('connection_limit', '1')
+			if (!parsed.searchParams.has('connect_timeout')) parsed.searchParams.set('connect_timeout', '10')
+		}
+		return parsed.toString()
+	} catch {
+		return url
+	}
+}
+
 const payloadSecret =
 	process.env.PAYLOAD_SECRET ||
 	(process.env.NODE_ENV !== 'production' ? 'dev-payload-secret' : '')
 
-const databaseUrl = getDatabaseUrl()
+const rawDatabaseUrl = getDatabaseUrl()
+const databaseUrl = rawDatabaseUrl ? normalizeDatabaseUrl(rawDatabaseUrl) : undefined
 
 const vercelURL = process.env.VERCEL_URL
 const inferredServerURL = vercelURL ? `https://${vercelURL}` : undefined
 
+if (process.env.NODE_ENV === 'production') {
+	if (!payloadSecret) {
+		throw new Error('Missing PAYLOAD_SECRET. Set it in Vercel Environment Variables.')
+	}
+	if (!databaseUrl) {
+		throw new Error(
+			'Missing DATABASE_URL (or POSTGRES_* env vars). Set it in Vercel Environment Variables.',
+		)
+	}
+}
+
 export default buildConfig({
+	debug: process.env.PAYLOAD_DEBUG === 'true',
+	hooks: {
+		afterError: [({ error, req, result }) => {
+			// Log full error details to server logs (Vercel Functions). Client responses remain sanitized.
+			console.error('[Payload afterError]', {
+				message: error?.message,
+				stack: error?.stack,
+				method: req?.method,
+				url: req?.url,
+				status: (result as any)?.status,
+			})
+		}],
+	},
 	serverURL:
 		process.env.PAYLOAD_PUBLIC_SERVER_URL ||
 		process.env.NEXT_PUBLIC_SITE_URL ||
@@ -184,7 +224,7 @@ export default buildConfig({
 	db: postgresAdapter({
 		pool: {
 			connectionString: databaseUrl,
-			max: 5,
+			max: process.env.VERCEL ? 1 : 5,
 			idleTimeoutMillis: 10_000,
 			connectionTimeoutMillis: 10_000,
 		},
