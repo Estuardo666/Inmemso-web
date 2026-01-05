@@ -72,7 +72,8 @@ function normalizeDatabaseUrl(url: string): string {
 		if (isPoolerHost) {
 			if (!parsed.searchParams.has('pgbouncer')) parsed.searchParams.set('pgbouncer', 'true')
 			if (!parsed.searchParams.has('connection_limit')) parsed.searchParams.set('connection_limit', '1')
-			if (!parsed.searchParams.has('connect_timeout')) parsed.searchParams.set('connect_timeout', '10')
+			if (!parsed.searchParams.has('connect_timeout')) parsed.searchParams.set('connect_timeout', '30')
+			if (!parsed.searchParams.has('pool_timeout')) parsed.searchParams.set('pool_timeout', '30')
 		}
 		return parsed.toString()
 	} catch {
@@ -230,8 +231,8 @@ export default buildConfig({
 		pool: {
 			connectionString: databaseUrl,
 			max: process.env.VERCEL ? 1 : 5,
-			idleTimeoutMillis: 10_000,
-			connectionTimeoutMillis: 10_000,
+			idleTimeoutMillis: 30_000,
+			connectionTimeoutMillis: 30_000,
 		},
 	}) as any,
 	secret: payloadSecret,
