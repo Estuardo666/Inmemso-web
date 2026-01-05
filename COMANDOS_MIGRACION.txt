@@ -1,0 +1,99 @@
+================================================================================
+MIGRACIÓN DE MONGODB A POSTGRESQL - COMANDOS A EJECUTAR
+================================================================================
+
+UBICACIÓN: c:\Users\Administrador\Documents\FM\Inmemso\Web\inmemso-architecture
+
+--------------------------------------------------------------------------------
+PASO 1: CONFIGURA POSTGRESQL
+--------------------------------------------------------------------------------
+
+1.1 Instala PostgreSQL si no lo tienes:
+    Descarga: https://www.postgresql.org/download/windows/
+    O usa Docker: docker run --name postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres
+
+1.2 Crea la base de datos:
+    Abre pgAdmin o usa psql:
+    CREATE DATABASE inmemso;
+
+--------------------------------------------------------------------------------
+PASO 2: CONFIGURA EL ENTORNO
+--------------------------------------------------------------------------------
+
+2.1 Copia el archivo de configuración:
+    Copy-Item env.local .env
+
+2.2 Edita .env y verifica las credenciales:
+    DATABASE_URL="postgresql://postgres:postgres@localhost:5432/inmemso?schema=public"
+    MONGODB_URI="mongodb://localhost:27017/inmemso"
+
+    (Si usas contraseña diferente, cámbiala en DATABASE_URL)
+
+--------------------------------------------------------------------------------
+PASO 3: PREPARA LA BASE DE DATOS
+--------------------------------------------------------------------------------
+
+3.1 Abre PowerShell en la carpeta del proyecto:
+    cd "c:\Users\Administrador\Documents\FM\Inmemso\Web\inmemso-architecture"
+
+3.2 Crea las tablas en PostgreSQL:
+    npx prisma db push
+
+    (Deberías ver: "Your database is now in sync with your Prisma schema")
+
+--------------------------------------------------------------------------------
+PASO 4: EJECUTA LA MIGRACIÓN
+--------------------------------------------------------------------------------
+
+4.1 Asegúrate de que MongoDB esté corriendo:
+    Get-Service -Name MongoDB
+    (Si no está corriendo: Start-Service MongoDB)
+
+4.2 Ejecuta el script de migración:
+    npx ts-node prisma\migrate-data.ts
+
+    (Verás: "🚀 Iniciando migración..." y luego el progreso)
+
+--------------------------------------------------------------------------------
+PASO 5: VERIFICA LA MIGRACIÓN
+--------------------------------------------------------------------------------
+
+5.1 Usa Prisma Studio (UI visual):
+    npx prisma studio
+    (Se abrirá una página web en http://localhost:5555)
+
+5.2 O verifica con consultas SQL:
+    Abre pgAdmin o tu cliente SQL favorito y ejecuta:
+    
+    SELECT * FROM users;
+    SELECT * FROM projects;
+    SELECT * FROM services;
+    SELECT * FROM testimonials;
+    SELECT * FROM media;
+
+--------------------------------------------------------------------------------
+RESUMEN DE ARCHIVOS GENERADOS
+--------------------------------------------------------------------------------
+
+✅ prisma/schema.prisma              - Esquema de PostgreSQL (7 modelos)
+✅ prisma/migrate-data.ts            - Script de migración automática
+✅ prisma/INSTRUCCIONES_MIGRACION.md - Guía detallada
+✅ prisma/INSTRUCCIONES_FINAL.md     - Pasos específicos
+✅ prisma/MIGRACION_COMPLETE.md      - Resumen completo
+✅ env.local                         - Plantilla de configuración
+✅ MIGRACION_POSTGRESQL.md           - Resumen en raíz
+✅ COMANDOS_MIGRACION.txt            - Este archivo
+
+================================================================================
+¿NECESITAS AYUDA?
+================================================================================
+
+Lee: prisma/INSTRUCCIONES_FINAL.md para detalles técnicos
+O: prisma/INSTRUCCIONES_MIGRACION.md para solución de problemas
+
+================================================================================
+
+
+
+
+

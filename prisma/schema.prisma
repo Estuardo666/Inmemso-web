@@ -1,0 +1,126 @@
+// Schema Prisma para SQLite (desarrollo) / PostgreSQL (producción)
+// Inmemso Architecture CMS - SQL-only schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// Model: User - Usuarios del CMS con autenticación
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  role      String   @default("viewer") // admin, editor, viewer
+  email     String   @unique
+  password  String
+  
+  // Campos de Payload CMS para autenticación
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("users")
+}
+
+// Model: Project - Proyectos de arquitectura
+model Project {
+  id              String   @id @default(uuid())
+  title           String
+  slug            String   @unique
+  description     String
+  content         String   // RichText de Payload, almacenado como texto
+  featuredImageId String?  // Referencia al Media
+  year            String?
+  status          String   @default("draft") // draft, published, archived
+  
+  // Arrays convertidos a relaciones
+  services        ProjectService[]
+  technologies    ProjectTechnology[]
+  
+  // Campos de control
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@map("projects")
+}
+
+// Model: Service - Servicios que ofrece la empresa
+model Service {
+  id              String   @id @default(uuid())
+  title           String
+  slug            String   @unique
+  description     String
+  content         String?  // RichText de Payload
+  icon            String?
+  featuredImageId String?  // Referencia al Media
+  
+  // Campos de control
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@map("services")
+}
+
+// Model: Media - Archivos multimedia subidos al CMS
+model Media {
+  id        String   @id @default(uuid())
+  alt       String
+  url       String?  // URL del archivo almacenado
+  
+  // Campos de control
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("media")
+}
+
+// Model: Testimonial - Testimonios de clientes (según payloadData.ts)
+model Testimonial {
+  id        String   @id @default(uuid())
+  name      String
+  position  String
+  company   String
+  quote     String
+  image     String?
+  
+  // Campos de control
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("testimonials")
+}
+
+// Tabla intermedia para relación Many-to-Many: Project -> Services
+model ProjectService {
+  id        String   @id @default(uuid())
+  projectId String
+  service   String   // Nombre del servicio (texto simple)
+  
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  @@unique([projectId, service])
+  @@map("project_services")
+}
+
+// Tabla intermedia para relación Many-to-Many: Project -> Technologies
+model ProjectTechnology {
+  id          String   @id @default(uuid())
+  projectId   String
+  technology  String   // Nombre de la tecnología (texto simple)
+  
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  @@unique([projectId, technology])
+  @@map("project_technologies")
+}
+
+// NOTAS DE MIGRACIÓN:
+// 1. _id de MongoDB convertido a id con @id @default(uuid())
+// 2. Arrays de Payload (services, technologies) convertidos a tablas intermedias
+// 3. Relaciones @relation establecidas entre modelos
+// 4. Campos richText de Payload se almacenan como String
+// 5. Campos de upload (featuredImage) se almacenan como IDs referenciados
+// 6. Se añadieron campos createdAt y updatedAt para control de versiones
+// 7. Todos los slugs son únicos (@unique) como en el original
