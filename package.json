@@ -14,7 +14,7 @@
     "dev": "vite",
     "dev:admin": "node admin-server.cjs",
     "dev:full": "concurrently \"npm run dev:admin\" \"npm run dev\"",
-    "build": "tsc && vite build",
+    "build": "prisma generate && tsc && vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "db:seed": "node prisma/seed-simple.cjs"
