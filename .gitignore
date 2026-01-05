@@ -18,6 +18,9 @@ dist-ssr
 .env.*
 !.env.example
 
+# Secrets (never commit)
+payload_secret.txt
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
