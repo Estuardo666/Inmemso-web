@@ -72,6 +72,18 @@ export default buildConfig({
 		process.env.PAYLOAD_PUBLIC_SERVER_URL ||
 		process.env.NEXT_PUBLIC_SITE_URL ||
 		'http://localhost:3000',
+	csrf: [
+		'http://localhost:3000',
+		'http://localhost:3001',
+		process.env.PAYLOAD_PUBLIC_SERVER_URL,
+		process.env.NEXT_PUBLIC_SITE_URL,
+	].filter(Boolean) as string[],
+	cors: [
+		'http://localhost:3000',
+		'http://localhost:3001',
+		process.env.PAYLOAD_PUBLIC_SERVER_URL,
+		process.env.NEXT_PUBLIC_SITE_URL,
+	].filter(Boolean) as string[],
 	admin: {
 		user: 'users',
 		meta: {
@@ -99,6 +111,9 @@ export default buildConfig({
 		},
 		{
 			slug: 'projects',
+			access: {
+				read: () => true,
+			},
 			fields: [
 				{ name: 'title', type: 'text', required: true },
 				{ name: 'slug', type: 'text', required: true, unique: true },
@@ -126,6 +141,9 @@ export default buildConfig({
 		},
 		{
 			slug: 'services',
+			access: {
+				read: () => true,
+			},
 			fields: [
 				{ name: 'title', type: 'text', required: true },
 				{ name: 'slug', type: 'text', required: true, unique: true },
@@ -137,10 +155,16 @@ export default buildConfig({
 		},
 		{
 			slug: 'media',
+			access: {
+				read: () => true,
+			},
 			fields: [{ name: 'alt', type: 'text', required: true }],
 		},
 		{
 			slug: 'testimonials',
+			access: {
+				read: () => true,
+			},
 			fields: [
 				{ name: 'name', type: 'text', required: true },
 				{ name: 'position', type: 'text', required: true },
