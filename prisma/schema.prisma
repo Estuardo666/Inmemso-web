@@ -15,6 +15,8 @@ model User {
   password  String
   createdAt DateTime @default(now())
   updatedAt DateTime
+  sessions  Session[]
+  preferences PayloadPreference[] @relation("UserPreferences")
 
   @@map("users")
 }
@@ -89,4 +91,38 @@ model project_technologies {
   technology String
 
   @@unique([projectId, technology])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  token     String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users_sessions")
+}
+
+model PayloadPreference {
+  id        String   @id @default(cuid())
+  key       String?
+  value     String?
+  userId    String?
+  user      User?    @relation("UserPreferences", fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("payload_preferences")
+}
+
+model PayloadMigration {
+  id        String   @id @default(cuid())
+  name      String
+  batch     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("payload_migrations")
 }
