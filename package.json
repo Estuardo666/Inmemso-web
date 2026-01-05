@@ -2,6 +2,10 @@
   "name": "inmemso-architecture",
   "private": true,
   "version": "0.0.0",
+  "engines": {
+    "node": "20.x",
+    "npm": ">=9.0.0"
+  },
   "type": "module",
   "description": "Inmemso Architecture - Modern React application with TypeScript and Framer Motion",
   "author": "Inmemso Team",
@@ -55,10 +59,6 @@
     "ts-node": "^10.9.2",
     "typescript": "~5.8.2",
     "vite": "^7.3.0"
-  },
-  "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=9.0.0"
   },
   "browserslist": {
     "production": [

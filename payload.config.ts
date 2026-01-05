@@ -253,9 +253,11 @@ export default buildConfig({
 		push: isProd || process.env.PAYLOAD_DB_PUSH === 'true',
 		pool: {
 			connectionString: databaseUrl,
-			max: isVercel ? 1 : 5,
+			// Payload Admin/API can issue multiple queries concurrently.
+			// Using max=1 on serverless often causes pg-pool wait timeouts.
+			max: isVercel ? 3 : 5,
 			// Help serverless environments survive Neon cold starts / DNS / TLS handshakes.
-			connectionTimeoutMillis: isVercel ? 60_000 : 30_000,
+			connectionTimeoutMillis: isVercel ? 120_000 : 30_000,
 			idleTimeoutMillis: 30_000,
 			allowExitOnIdle: true,
 			keepAlive: true,
