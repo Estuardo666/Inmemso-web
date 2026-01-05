@@ -11,6 +11,33 @@ const nextConfig = {
   images: {
     domains: ['localhost'],
   },
+
+  // Payload Admin pulls in some dependencies that import CSS from node_modules.
+  // If those are externalized, Node will try to import `.css` directly and crash.
+  // Transpile/bundle them instead.
+  transpilePackages: [
+    'payload',
+    '@payloadcms/next',
+    '@payloadcms/db-postgres',
+    '@payloadcms/richtext-lexical',
+    'react-image-crop',
+  ],
+
+  webpack: (config) => {
+    // Payload ships a dynamic require in its job runner. Webpack warns about it,
+    // but it is expected and safe to ignore for Next builds.
+    config.ignoreWarnings = [
+      ...(config.ignoreWarnings || []),
+      {
+        message:
+          /Critical dependency: the request of a dependency is an expression/i,
+        module:
+          /payload[\\/]dist[\\/]queues[\\/]operations[\\/]runJobs[\\/]runJob[\\/]importHandlerPath\.js/i,
+      },
+    ]
+
+    return config
+  },
 }
 
 export default withPayload(nextConfig)
