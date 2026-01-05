@@ -4,7 +4,6 @@
  */
 
 import { PrismaClient } from '@prisma/client';
-import * as crypto from 'crypto';
 
 const prisma = new PrismaClient();
 
@@ -31,10 +30,8 @@ async function createAdminUser() {
     // Crear usuario admin
     const adminUser = await prisma.user.create({
       data: {
-        id: crypto.randomUUID(),
         name: 'Administrador Inmemso',
         email: 'admin@inmemso.com',
-        password: 'password123', // En producción, esto debería estar hasheado
         role: 'admin',
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -43,7 +40,6 @@ async function createAdminUser() {
 
     console.log('✅ Usuario administrador creado exitosamente:');
     console.log('   Email:', adminUser.email);
-    console.log('   Password:', 'password123');
     console.log('   Role:', adminUser.role);
     console.log('   ID:', adminUser.id);
 

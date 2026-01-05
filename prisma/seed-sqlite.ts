@@ -4,6 +4,7 @@
  */
 
 import { PrismaClient } from '@prisma/client';
+import crypto from 'crypto';
 
 const prisma = new PrismaClient();
 
@@ -107,7 +108,6 @@ const mockTestimonials = [
 function convertMockToPrisma() {
   // Servicios
   const services = mockServices.map(service => ({
-    id: service.id,
     title: service.title,
     slug: service.title.toLowerCase().replace(/\s+/g, '-'),
     description: service.description,
@@ -120,7 +120,6 @@ function convertMockToPrisma() {
 
   // Proyectos
   const projects = mockProjects.map(project => ({
-    id: project.id,
     title: project.title,
     slug: project.title.toLowerCase().replace(/\s+/g, '-'),
     description: project.description,
@@ -134,7 +133,6 @@ function convertMockToPrisma() {
 
   // Testimonios
   const testimonials = mockTestimonials.map(testimonial => ({
-    id: testimonial.id,
     name: testimonial.name,
     position: testimonial.position,
     company: testimonial.company,
@@ -144,24 +142,7 @@ function convertMockToPrisma() {
     updatedAt: new Date(),
   }));
 
-  // Relaciones Proyecto-Servicio (simplificadas)
-  const projectServices = [
-    { id: '1', projectId: '1', service: 'Arquitectura Residencial' },
-    { id: '2', projectId: '2', service: 'Arquitectura Comercial' },
-    { id: '3', projectId: '3', service: 'Diseño de Interiores' },
-  ];
-
-  // Relaciones Proyecto-Tecnología (simplificadas)
-  const projectTechnologies = [
-    { id: '1', projectId: '1', technology: 'Sostenible' },
-    { id: '2', projectId: '1', technology: 'Moderno' },
-    { id: '3', projectId: '2', technology: 'Eficiente' },
-    { id: '4', projectId: '2', technology: 'Colaborativo' },
-    { id: '5', projectId: '3', technology: 'Industrial' },
-    { id: '6', projectId: '3', technology: 'Contemporáneo' },
-  ];
-
-  return { services, projects, testimonials, projectServices, projectTechnologies };
+  return { services, projects, testimonials };
 }
 
 /**
@@ -170,16 +151,14 @@ function convertMockToPrisma() {
 async function seedDatabase() {
   console.log('\n🌱 Sembrando datos de desarrollo en SQLite...\n');
 
-  const { services, projects, testimonials, projectServices, projectTechnologies } = convertMockToPrisma();
+  const { services, projects, testimonials } = convertMockToPrisma();
 
   // Insertar usuarios (un usuario admin de prueba)
   console.log('👤 Insertando usuario admin...');
   await prisma.user.create({
     data: {
-      id: 'admin-001',
       name: 'Administrador',
       email: 'admin@inmemso.com',
-      password: 'admin123', // En producción, esto debería estar hasheado
       role: 'admin',
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -200,10 +179,12 @@ async function seedDatabase() {
 
   // Insertar proyectos
   console.log('\n🏗️  Insertando proyectos...');
+  const createdProjects: Array<{ id: number; title: string }> = [];
   for (const project of projects) {
     try {
-      await prisma.project.create({ data: project });
-      console.log(`  ✅ ${project.title}`);
+      const created = await prisma.project.create({ data: project });
+      createdProjects.push({ id: created.id, title: created.title });
+      console.log(`  ✅ ${created.title}`);
     } catch (error) {
       console.error(`  ❌ Error con proyecto ${project.title}:`, error);
     }
@@ -220,25 +201,29 @@ async function seedDatabase() {
     }
   }
 
-  // Insertar relaciones Proyecto-Servicio
-  console.log('\n🔗 Insertando relaciones Proyecto-Servicio...');
-  for (const rel of projectServices) {
+  // Insertar relaciones de arrays (Payload): projects_services y projects_technologies
+  console.log('\n🔗 Insertando arrays de Proyecto (services/technologies)...');
+  for (const { id: projectId, title } of createdProjects) {
     try {
-      await prisma.projectService.create({ data: rel });
-      console.log(`  ✅ Proyecto ${rel.projectId} -> Servicio ${rel.service}`);
+      await prisma.projectService.create({
+        data: {
+          id: crypto.randomUUID(),
+          order: 0,
+          projectId,
+          service: 'Servicio de ejemplo',
+        },
+      });
+      await prisma.projectTechnology.create({
+        data: {
+          id: crypto.randomUUID(),
+          order: 0,
+          projectId,
+          technology: 'Tecnología de ejemplo',
+        },
+      });
+      console.log(`  ✅ Arrays creados para: ${title}`);
     } catch (error) {
-      console.error(`  ❌ Error con relación:`, error);
-    }
-  }
-
-  // Insertar relaciones Proyecto-Tecnología
-  console.log('\n🔗 Insertando relaciones Proyecto-Tecnología...');
-  for (const rel of projectTechnologies) {
-    try {
-      await prisma.projectTechnology.create({ data: rel });
-      console.log(`  ✅ Proyecto ${rel.projectId} -> Tecnología ${rel.technology}`);
-    } catch (error) {
-      console.error(`  ❌ Error con relación:`, error);
+      console.error('  ❌ Error creando arrays del proyecto:', error);
     }
   }
 }

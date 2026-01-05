@@ -250,7 +250,7 @@ export default buildConfig({
 	],
 	editor: lexicalEditor({}),
 	db: postgresAdapter({
-		push: process.env.NODE_ENV === 'production',
+		push: isProd || process.env.PAYLOAD_DB_PUSH === 'true',
 		pool: {
 			connectionString: databaseUrl,
 			max: isVercel ? 1 : 5,
