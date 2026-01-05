@@ -5,6 +5,7 @@ import fs from 'fs'
 import path from 'path'
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'url'
+import { migrations } from './src/migrations'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -278,6 +279,7 @@ export default buildConfig({
 	db: postgresAdapter({
 		idType: 'uuid',
 		push: isProd || process.env.PAYLOAD_DB_PUSH === 'true',
+		prodMigrations: migrations,
 		pool: {
 			connectionString: databaseUrl,
 			// Payload Admin/API can issue multiple queries concurrently.
