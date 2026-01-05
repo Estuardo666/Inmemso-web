@@ -2,6 +2,9 @@ import React from 'react'
 import { handleServerFunctions, RootLayout } from '@payloadcms/next/layouts'
 import config from '@/payload.config'
 
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 const importMap = {}
 
 async function serverFunction(args: { name: string; args: Record<string, unknown> }) {
