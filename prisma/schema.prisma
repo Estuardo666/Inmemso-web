@@ -38,7 +38,7 @@ model Project {
   slug            String   @unique
   description     String
   content         String
-  featuredImageId String?
+  featuredImageId String?  @db.Uuid
   year            String?
   status          String   @default("draft")
   createdAt       DateTime @default(now())
@@ -59,7 +59,7 @@ model Service {
   description     String
   content         String?
   icon            String?
-  featuredImageId String?
+  featuredImageId String?  @db.Uuid
   createdAt       DateTime @default(now())
   updatedAt       DateTime
   featuredImage   Media?   @relation(fields: [featuredImageId], references: [id], onDelete: SetNull)
@@ -97,7 +97,7 @@ model ProjectService {
   
   // Relación con el padre (Project)
   project   Project @relation(fields: [parentId], references: [id], onDelete: Cascade)
-  parentId  String  @map("_parent_id")
+  parentId  String  @map("_parent_id") @db.Uuid
   
   // El campo de texto dentro del array
   service   String?
@@ -113,7 +113,7 @@ model ProjectTechnology {
   
   // Relación con el padre (Project)
   project    Project @relation(fields: [parentId], references: [id], onDelete: Cascade)
-  parentId   String  @map("_parent_id")
+  parentId   String  @map("_parent_id") @db.Uuid
   
   // El campo de texto dentro del array
   technology String?
@@ -128,7 +128,7 @@ model Session {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   
   user      User     @relation(fields: [parentId], references: [id], onDelete: Cascade)
-  parentId  String   @map("_parent_id")
+  parentId  String   @map("_parent_id") @db.Uuid
   
   token     String
   
@@ -146,7 +146,7 @@ model PayloadPreference {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   key       String?
   value     String?
-  userId    String?
+  userId    String?  @db.Uuid
   user      User?    @relation("UserPreferences", fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
