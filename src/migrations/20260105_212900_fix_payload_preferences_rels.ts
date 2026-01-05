@@ -17,22 +17,10 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
     "order" integer,
     "parent_id" integer NOT NULL,
     "path" varchar NOT NULL,
-    "users_id" integer
+    "users_id" integer,
+    CONSTRAINT "payload_preferences_rels_parent_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."payload_preferences"("id") ON DELETE cascade ON UPDATE no action,
+    CONSTRAINT "payload_preferences_rels_users_fk" FOREIGN KEY ("users_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action
   );
-
-  -- fks (guarded)
-  DO $$ BEGIN
-    IF NOT EXISTS (
-      SELECT 1 FROM pg_constraint WHERE conname = 'payload_preferences_rels_parent_fk'
-    ) THEN
-      ALTER TABLE "payload_preferences_rels" ADD CONSTRAINT "payload_preferences_rels_parent_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."payload_preferences"("id") ON DELETE cascade ON UPDATE no action;
-    END IF;
-    IF NOT EXISTS (
-      SELECT 1 FROM pg_constraint WHERE conname = 'payload_preferences_rels_users_fk'
-    ) THEN
-      ALTER TABLE "payload_preferences_rels" ADD CONSTRAINT "payload_preferences_rels_users_fk" FOREIGN KEY ("users_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
-    END IF;
-  END $$;
 
   -- indexes (guarded)
   CREATE INDEX IF NOT EXISTS "payload_preferences_key_idx" ON "payload_preferences" USING btree ("key");
