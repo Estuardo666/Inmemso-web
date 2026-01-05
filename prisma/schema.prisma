@@ -95,10 +95,17 @@ model project_technologies {
 
 model Session {
   id        String   @id @default(cuid())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String
+  
+  // Relación con User
+  user      User     @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  parentId  String   @map("_parent_id")
+  
   token     String
   expiresAt DateTime
+  
+  // Campos de sistema obligatorios para Payload Arrays/Joins
+  order     Int?     @map("_order")
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
