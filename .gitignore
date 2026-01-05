@@ -34,3 +34,5 @@ payload_secret.txt
 .aider*
 
 /src/generated/prisma
+.vercel
+.env*.local

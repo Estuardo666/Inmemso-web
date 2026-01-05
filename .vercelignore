@@ -1,0 +1,25 @@
+# Vercel CLI upload ignore
+node_modules
+.next
+dist
+.vercel
+
+# Local DB/artifacts
+dev.db
+*.db
+
+# Local env files
+.env
+.env.*
+env.local
+
+# Editor/OS
+.idea
+.vscode
+.DS_Store
+Thumbs.db
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
