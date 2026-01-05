@@ -43,14 +43,21 @@ loadEnvFile(path.resolve(process.cwd(), '.env'), false)
 loadEnvFile(path.resolve(process.cwd(), '.env.local'), true)
 
 function getDatabaseUrl(): string | undefined {
-	const direct = process.env.DATABASE_URL
-	if (direct && direct.trim()) return direct.trim()
+	const candidates = [
+		process.env.DATABASE_URL,
+		process.env.POSTGRES_PRISMA_URL,
+		process.env.POSTGRES_URL,
+	]
+		.map((v) => v?.trim())
+		.filter(Boolean) as string[]
 
-	const postgresPrismaUrl = process.env.POSTGRES_PRISMA_URL
-	if (postgresPrismaUrl && postgresPrismaUrl.trim()) return postgresPrismaUrl.trim()
-
-	const postgresUrl = process.env.POSTGRES_URL
-	if (postgresUrl && postgresUrl.trim()) return postgresUrl.trim()
+	if (candidates.length) {
+		// In serverless (Vercel), prefer Neon pooler URLs when present.
+		if (process.env.VERCEL) {
+			return candidates.find((u) => u.includes('-pooler.')) || candidates[0]
+		}
+		return candidates[0]
+	}
 
 	const host = process.env.PGHOST
 	const user = process.env.PGUSER
@@ -87,6 +94,22 @@ const payloadSecret =
 
 const rawDatabaseUrl = getDatabaseUrl()
 const databaseUrl = rawDatabaseUrl ? normalizeDatabaseUrl(rawDatabaseUrl) : undefined
+
+const isVercel = Boolean(process.env.VERCEL)
+const isProd = process.env.NODE_ENV === 'production'
+
+if (isVercel && databaseUrl) {
+	try {
+		const parsed = new URL(databaseUrl)
+		if (!parsed.host.includes('-pooler.')) {
+			console.warn(
+				`[Payload] DATABASE_URL host is not a Neon pooler host (${parsed.host}). If you are using Neon on Vercel, prefer the -pooler endpoint to avoid connection issues.`,
+			)
+		}
+	} catch {
+		// ignore
+	}
+}
 
 const vercelURL = process.env.VERCEL_URL
 const inferredServerURL = vercelURL ? `https://${vercelURL}` : undefined
@@ -230,9 +253,20 @@ export default buildConfig({
 		push: process.env.NODE_ENV === 'production',
 		pool: {
 			connectionString: databaseUrl,
-			max: process.env.VERCEL ? 1 : 5,
+			max: isVercel ? 1 : 5,
+			// Help serverless environments survive Neon cold starts / DNS / TLS handshakes.
+			connectionTimeoutMillis: isVercel ? 60_000 : 30_000,
 			idleTimeoutMillis: 30_000,
-			connectionTimeoutMillis: 30_000,
+			allowExitOnIdle: true,
+			keepAlive: true,
+			// node-postgres does not reliably honor `sslmode=require` from the URL in all setups.
+			...(isProd
+				? {
+					ssl: {
+						rejectUnauthorized: false,
+					},
+				}
+				: {}),
 		},
 	}) as any,
 	secret: payloadSecret,
