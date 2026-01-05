@@ -29,7 +29,7 @@ model User {
 
   // Fechas de sistema
   createdAt               DateTime  @default(now()) @map("created_at")
-  updatedAt               DateTime  @updatedAt @map("updated_at")
+  updatedAt               DateTime  @default(now()) @updatedAt @map("updated_at")
 
   // Relaciones (Con UUIDs en la FK)
   sessions                Session[]
@@ -47,8 +47,8 @@ model Project {
   featuredImageId String?  @db.Uuid
   year            String?
   status          String   @default("draft")
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
   featuredImage   Media?   @relation(fields: [featuredImageId], references: [id], onDelete: SetNull)
   
   // Relaciones inversas para arrays de Payload
@@ -66,8 +66,8 @@ model Service {
   content         String?
   icon            String?
   featuredImageId String?  @db.Uuid
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
   featuredImage   Media?   @relation(fields: [featuredImageId], references: [id], onDelete: SetNull)
 
   @@map("services")
@@ -77,8 +77,8 @@ model Media {
   id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   alt       String
   url       String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at")
   projects  Project[]
   services  Service[]
 
@@ -92,8 +92,8 @@ model Testimonial {
   company   String
   quote     String
   image     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@map("testimonials")
 }
@@ -152,8 +152,8 @@ model PayloadPreference {
   value     String?
   userId    String?  @db.Uuid
   user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@map("payload_preferences")
 }
@@ -162,8 +162,8 @@ model PayloadMigration {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name      String
   batch     Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@map("payload_migrations")
 }
