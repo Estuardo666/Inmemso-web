@@ -7,6 +7,9 @@ import {
 } from '@payloadcms/next/routes'
 import config from '@/payload.config'
 
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 export const OPTIONS = REST_OPTIONS(config)
 export const GET = REST_GET(config)
 export const POST = REST_POST(config)

@@ -67,22 +67,28 @@ const payloadSecret =
 
 const databaseUrl = getDatabaseUrl()
 
+const vercelURL = process.env.VERCEL_URL
+const inferredServerURL = vercelURL ? `https://${vercelURL}` : undefined
+
 export default buildConfig({
 	serverURL:
 		process.env.PAYLOAD_PUBLIC_SERVER_URL ||
 		process.env.NEXT_PUBLIC_SITE_URL ||
+		inferredServerURL ||
 		'http://localhost:3000',
 	csrf: [
 		'http://localhost:3000',
 		'http://localhost:3001',
 		process.env.PAYLOAD_PUBLIC_SERVER_URL,
 		process.env.NEXT_PUBLIC_SITE_URL,
+		inferredServerURL,
 	].filter(Boolean) as string[],
 	cors: [
 		'http://localhost:3000',
 		'http://localhost:3001',
 		process.env.PAYLOAD_PUBLIC_SERVER_URL,
 		process.env.NEXT_PUBLIC_SITE_URL,
+		inferredServerURL,
 	].filter(Boolean) as string[],
 	admin: {
 		user: 'users',
@@ -178,6 +184,9 @@ export default buildConfig({
 	db: postgresAdapter({
 		pool: {
 			connectionString: databaseUrl,
+			max: 5,
+			idleTimeoutMillis: 10_000,
+			connectionTimeoutMillis: 10_000,
 		},
 	}) as any,
 	secret: payloadSecret,

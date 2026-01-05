@@ -1,6 +1,9 @@
 import { RootPage } from '@payloadcms/next/views'
 import config from '@/payload.config'
 
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 type PageProps = {
   params: Promise<{
     segments?: string[]
