@@ -4,6 +4,10 @@ import { postgresAdapter } from '@payloadcms/db-postgres'
 import fs from 'fs'
 import path from 'path'
 import dotenv from 'dotenv'
+import { fileURLToPath } from 'url'
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 function decodeEnvFile(buffer: Buffer): string {
 	// Handle UTF-16LE/BE (common on Windows when saved as "Unicode")
@@ -222,6 +226,7 @@ export default buildConfig({
 	],
 	editor: lexicalEditor({}),
 	db: postgresAdapter({
+		push: process.env.NODE_ENV === 'production',
 		pool: {
 			connectionString: databaseUrl,
 			max: process.env.VERCEL ? 1 : 5,
