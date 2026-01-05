@@ -92,7 +92,26 @@ const databaseUrl =
 	(process.env.DATABASE_URL && process.env.DATABASE_URL.trim()) ||
 	deriveDatabaseUrlFromParts()
 
+function isPrismaGenerateLikeCommand(): boolean {
+	// Prisma CLI loads this config for all commands.
+	// `prisma generate` does not require a live database connection, but our
+	// deploy environments may not provide DATABASE_URL at build time.
+	// We allow a placeholder URL only for generation-like commands.
+	const args = process.argv.join(' ').toLowerCase()
+	return (
+		args.includes(' prisma ') &&
+		(args.includes(' generate') || args.includes(' format') || args.includes(' validate'))
+	)
+}
+
+const placeholderDatabaseUrl =
+	'postgresql://placeholder:placeholder@localhost:5432/placeholder?schema=public'
+
 if (!databaseUrl || databaseUrl.trim().length === 0) {
+	if (isPrismaGenerateLikeCommand()) {
+		// Allow `prisma generate` during builds without leaking secrets.
+		process.env.DATABASE_URL = placeholderDatabaseUrl
+	} else {
 	console.error('[prisma.config] cwd:', process.cwd())
 	console.error('[prisma.config] .env found:', Boolean(findUp('.env', process.cwd())))
 	console.error('[prisma.config] .env.local found:', Boolean(findUp('.env.local', process.cwd())))
@@ -112,6 +131,7 @@ if (!databaseUrl || databaseUrl.trim().length === 0) {
 	throw new Error(
 		'Missing DATABASE_URL. Set DATABASE_URL in .env.local/.env, or provide PGHOST/PGUSER/PGPASSWORD/PGDATABASE (or POSTGRES_PRISMA_URL) before running `npx prisma db push`.'
 	)
+	}
 }
 
 export default defineConfig({
@@ -120,6 +140,6 @@ export default defineConfig({
 		path: 'prisma/migrations',
 	},
 	datasource: {
-		url: databaseUrl,
+		url: (databaseUrl && databaseUrl.trim()) || process.env.DATABASE_URL || placeholderDatabaseUrl,
 	},
 })
