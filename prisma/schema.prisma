@@ -8,26 +8,32 @@ datasource db {
 }
 
 model User {
+  // ID: Generado por DB como UUID nativo
   id                      String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  
   name                    String?
   email                   String    @unique
   role                    String    @default("user")
   
-  // MAPEOS DE FECHAS (Crucial para Payload)
-  createdAt               DateTime  @default(now()) @map("created_at")
-  updatedAt               DateTime  @updatedAt @map("updated_at")
+  // CAMPOS DE AUTH (CRUCIALES: Deben tener @map si Payload usa snake_case)
+  salt                    String?   // Payload busca 'salt'
+  hash                    String?   // Payload busca 'hash'
   
-  // Campos de Auth de Payload
-  resetPasswordToken      String?   @map("reset_password_token")
-  resetPasswordExpiration DateTime? @map("reset_password_expiration")
-  salt                    String?
-  hash                    String?
+  // Estos fallaban: Payload busca snake_case en la query
   loginAttempts           Int?      @default(0) @map("login_attempts")
   lockUntil               DateTime? @map("lock_until")
+  
+  // Recuperación de contraseña
+  resetPasswordToken      String?   @map("reset_password_token")
+  resetPasswordExpiration DateTime? @map("reset_password_expiration")
 
-  // Relaciones
+  // Fechas de sistema
+  createdAt               DateTime  @default(now()) @map("created_at")
+  updatedAt               DateTime  @updatedAt @map("updated_at")
+
+  // Relaciones (Con UUIDs en la FK)
   sessions                Session[]
-  preferences             PayloadPreference[] @relation("UserPreferences")
+  preferences             PayloadPreference[]
   
   @@map("users")
 }
@@ -128,16 +134,14 @@ model Session {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   
   user      User     @relation(fields: [parentId], references: [id], onDelete: Cascade)
-  parentId  String   @map("_parent_id") @db.Uuid
+  parentId  String   @map("_parent_id") @db.Uuid // <-- UUID AQUÍ TAMBIÉN
   
   token     String
-  
-  // MAPEOS DE FECHAS Y CAMPOS (Crucial)
   expiresAt DateTime @map("expires_at")
+  order     Int?     @map("_order")
+  
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
-  
-  order     Int?     @map("_order")
 
   @@map("users_sessions")
 }
@@ -147,7 +151,7 @@ model PayloadPreference {
   key       String?
   value     String?
   userId    String?  @db.Uuid
-  user      User?    @relation("UserPreferences", fields: [userId], references: [id], onDelete: Cascade)
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
