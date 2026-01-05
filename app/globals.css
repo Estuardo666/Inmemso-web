@@ -4,9 +4,10 @@
 /* Configuración personalizada para Tailwind v4 */
 @config "../tailwind.config.js";
 
-/* Custom Base Styles */
+/* Custom Base Styles - Solo para rutas frontend, no para Payload */
 @layer base {
-  body {
+  /* Aplicar estilos al html cuando no es admin */
+  html:not(:has(.payload-root)) body {
     @apply bg-primary text-white antialiased overflow-x-hidden;
     font-family: 'Manrope', sans-serif;
   }

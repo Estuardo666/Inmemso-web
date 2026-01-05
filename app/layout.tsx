@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Inmemso Architecture',
@@ -10,9 +11,5 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  return (
-    <html lang="es">
-      <body>{children}</body>
-    </html>
-  )
+  return children
 }
