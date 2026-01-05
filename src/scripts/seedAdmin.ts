@@ -1,67 +1,58 @@
 /**
- * Script para crear usuario administrador en SQLite
- * Ejecutar una sola vez: npx ts-node src/scripts/seedAdmin.ts
+ * Seed script: Crea el primer usuario administrador en Payload CMS
+ * Ejecutar con: tsx src/scripts/seedAdmin.ts
  */
 
-import { PrismaClient } from '@prisma/client';
-import crypto from 'crypto';
+import { getPayload } from 'payload'
+import config from '../../payload.config'
 
-const prisma = new PrismaClient();
+/**
+ * Seed function para crear usuario admin
+ */
+async function seedAdmin() {
+	try {
+		console.log('[Seed] Inicializando Payload CMS...')
+		const payload = await getPayload({ config })
 
-async function createAdminUser() {
-  console.log('👤 Creando usuario administrador...\n');
+		console.log('[Seed] Verificando si el usuario ya existe...')
+		const existingUser = await payload.find({
+			collection: 'users',
+			where: {
+				email: {
+					equals: 'estuarlito@gmail.com',
+				},
+			},
+		})
 
-  try {
-    // Verificar si ya existe un admin
-    const existingAdmin = await prisma.user.findFirst({
-      where: { email: 'admin@inmemso.com' }
-    });
+		if (existingUser.docs.length > 0) {
+			console.log('[Seed] ✅ Usuario estuarlito@gmail.com ya existe. Saltando creación.')
+			process.exit(0)
+		}
 
-    if (existingAdmin) {
-      console.log('⚠️  El usuario admin@inmemso.com ya existe');
-      console.log('Datos existentes:', {
-        id: existingAdmin.id,
-        name: existingAdmin.name,
-        email: existingAdmin.email,
-        role: existingAdmin.role
-      });
-      return;
-    }
+		console.log('[Seed] Creando usuario administrador...')
+		const newUser = await payload.create({
+			collection: 'users',
+			data: {
+				email: 'estuarlito@gmail.com',
+				password: 'LOXAliberis9713',
+				name: 'Stuart',
+				role: 'admin',
+			},
+		})
 
-    // Crear usuario admin
-    const adminUser = await prisma.user.create({
-      data: {
-        id: crypto.randomUUID(),
-        name: 'Administrador Inmemso',
-        email: 'admin@inmemso.com',
-        hash: 'hashed_password',  // En producción, usar bcrypt
-        salt: 'salt_value',
-        role: 'admin',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    });
-
-    console.log('✅ Usuario administrador creado exitosamente:');
-    console.log('   Email:', adminUser.email);
-    console.log('   Role:', adminUser.role);
-    console.log('   ID:', adminUser.id);
-
-    // Mostrar todos los usuarios
-    const allUsers = await prisma.user.findMany();
-    console.log('\n📊 Total de usuarios en la base de datos:', allUsers.length);
-    allUsers.forEach(user => {
-      console.log(`   - ${user.name} (${user.email}) [${user.role}]`);
-    });
-
-  } catch (error) {
-    console.error('❌ Error creando usuario admin:', error);
-    process.exit(1);
-  } finally {
-    await prisma.$disconnect();
-    console.log('\n🔌 Conexión a SQLite cerrada');
-  }
+		console.log('[Seed] ✅ Usuario creado exitosamente:')
+		console.log(`  - ID: ${newUser.id}`)
+		console.log(`  - Email: ${newUser.email}`)
+		console.log(`  - Name: ${newUser.name}`)
+		console.log(`  - Role: ${newUser.role}`)
+		console.log('[Seed] 🎉 Seed completado.')
+		process.exit(0)
+	} catch (error) {
+		console.error('[Seed] ❌ Error durante el seed:')
+		console.error(error)
+		process.exit(1)
+	}
 }
 
-// Ejecutar el script
-createAdminUser();
+// Ejecutar el seed
+seedAdmin()
