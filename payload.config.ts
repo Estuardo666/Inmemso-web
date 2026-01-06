@@ -288,8 +288,9 @@ export default buildConfig({
 	db: postgresAdapter({
 		idType: 'uuid',
 		// En desarrollo: push=true para crear tablas automáticamente
-		// En producción (Vercel): push=false para evitar migraciones interactivas bloqueantes
+		// En producción (Vercel): push=false para evitar prompts interactivos que cuelgan el build
 		push: process.env.NODE_ENV !== 'production',
+		// Usar migraciones precompiladas en producción en lugar de preguntar
 		prodMigrations: migrations,
 		// Normalizar rutas de migración para ESM en Windows
 		migrationDir: path.resolve(dirname, 'prisma', 'migrations'),
