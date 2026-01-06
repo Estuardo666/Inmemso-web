@@ -1,7 +1,7 @@
 {
-  "buildCommand": "npm run build",
+  "buildCommand": "npx payload migrate:fresh --config payload.config.ts && npm run build",
   "installCommand": "npm install",
   "env": {
-    "PAYLOAD_RUN_MIGRATIONS": "false"
+    "PAYLOAD_RUN_MIGRATIONS": "true"
   }
 }
