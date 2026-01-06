@@ -90,7 +90,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   fallbackLocale: null;
   globals: {};
@@ -127,7 +127,7 @@ export interface UserAuthOperations {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   name: string;
   role?: ('admin' | 'editor' | 'viewer') | null;
   updatedAt: string;
@@ -153,7 +153,7 @@ export interface User {
  * via the `definition` "projects".
  */
 export interface Project {
-  id: number;
+  id: string;
   title: string;
   slug: string;
   description: string;
@@ -172,7 +172,7 @@ export interface Project {
     };
     [k: string]: unknown;
   };
-  featuredImage?: (number | null) | Media;
+  featuredImage?: (string | null) | Media;
   services?:
     | {
         service?: string | null;
@@ -195,7 +195,7 @@ export interface Project {
  * via the `definition` "media".
  */
 export interface Media {
-  id: number;
+  id: string;
   alt: string;
   updatedAt: string;
   createdAt: string;
@@ -205,7 +205,7 @@ export interface Media {
  * via the `definition` "services".
  */
 export interface Service {
-  id: number;
+  id: string;
   title: string;
   slug: string;
   description: string;
@@ -225,7 +225,7 @@ export interface Service {
     [k: string]: unknown;
   } | null;
   icon?: string | null;
-  featuredImage?: (number | null) | Media;
+  featuredImage?: (string | null) | Media;
   updatedAt: string;
   createdAt: string;
 }
@@ -234,7 +234,7 @@ export interface Service {
  * via the `definition` "testimonials".
  */
 export interface Testimonial {
-  id: number;
+  id: string;
   name: string;
   position: string;
   company: string;
@@ -248,7 +248,7 @@ export interface Testimonial {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: number;
+  id: string;
   key: string;
   data:
     | {
@@ -265,32 +265,32 @@ export interface PayloadKv {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null)
     | ({
         relationTo: 'projects';
-        value: number | Project;
+        value: string | Project;
       } | null)
     | ({
         relationTo: 'services';
-        value: number | Service;
+        value: string | Service;
       } | null)
     | ({
         relationTo: 'media';
-        value: number | Media;
+        value: string | Media;
       } | null)
     | ({
         relationTo: 'testimonials';
-        value: number | Testimonial;
+        value: string | Testimonial;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -300,10 +300,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -323,7 +323,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;

@@ -2,7 +2,7 @@
 @import "tailwindcss";
 
 /* Configuración personalizada para Tailwind v4 */
-@config "../tailwind.config.js";
+@config "../../tailwind.config.js";
 
 /* Custom Base Styles - Solo para rutas frontend, no para Payload */
 @layer base {

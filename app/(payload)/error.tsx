@@ -8,30 +8,36 @@ type Props = {
 }
 
 export default function PayloadError({ error, reset }: Props) {
-  // Buenas prácticas:
-  // - Mantenerlo client-only (requisito de Next.js para error boundaries).
-  // - No usar estilos globales del frontend (Tailwind) para no afectar Admin.
   useEffect(() => {
-    // Log serverless-friendly (aparece en consola del navegador; en prod complementa con observabilidad si aplica).
     console.error('[Payload Admin] Route error boundary:', error)
   }, [error])
 
   return (
-    <html lang="es">
-      <body>
-        <main>
-          <h1>Admin error</h1>
-          <p>Ocurrió un error cargando el panel de administración.</p>
-          <p>
-            <button type="button" onClick={() => reset()}>
-              Reintentar
-            </button>
-          </p>
-          {process.env.NODE_ENV !== 'production' ? (
-            <pre style={{ whiteSpace: 'pre-wrap' }}>{String(error?.message || error)}</pre>
-          ) : null}
-        </main>
-      </body>
-    </html>
+    <div style={{ padding: '2rem', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+      <h1>⚠️ Error en Admin</h1>
+      <p>Ocurrió un error cargando el panel de administración.</p>
+      <button
+        type="button"
+        onClick={() => reset()}
+        style={{
+          padding: '0.5rem 1rem',
+          marginBottom: '1rem',
+          cursor: 'pointer',
+          backgroundColor: '#0070f3',
+          color: 'white',
+          border: 'none',
+          borderRadius: '4px',
+        }}
+      >
+        Reintentar
+      </button>
+      {process.env.NODE_ENV !== 'production' ? (
+        <pre style={{ whiteSpace: 'pre-wrap', backgroundColor: '#f5f5f5', padding: '1rem' }}>
+          {String(error?.message || error)}
+        </pre>
+      ) : null}
+    </div>
   )
 }
+
+

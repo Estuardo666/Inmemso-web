@@ -278,8 +278,12 @@ export default buildConfig({
 	editor: lexicalEditor({}),
 	db: postgresAdapter({
 		idType: 'uuid',
-		push: isProd || process.env.PAYLOAD_DB_PUSH === 'true',
+		// En desarrollo: push=true para crear tablas automáticamente
+		// En producción (Vercel): push=false para evitar migraciones interactivas bloqueantes
+		push: process.env.NODE_ENV !== 'production',
 		prodMigrations: migrations,
+		// Normalizar rutas de migración para ESM en Windows
+		migrationDir: path.resolve(dirname, 'prisma', 'migrations'),
 		pool: {
 			connectionString: databaseUrl,
 			// Payload Admin/API can issue multiple queries concurrently.

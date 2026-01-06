@@ -14,11 +14,9 @@ const nextConfig = {
 
   // Payload Admin pulls in some dependencies that import CSS from node_modules.
   // If those are externalized, Node will try to import `.css` directly and crash.
-  // Transpile/bundle them instead.
+  // Transpile/bundle them instead. Payload packages are handled by withPayload plugin.
   transpilePackages: [
-    'payload',
     '@payloadcms/next',
-    '@payloadcms/db-postgres',
     '@payloadcms/richtext-lexical',
     'react-image-crop',
   ],
