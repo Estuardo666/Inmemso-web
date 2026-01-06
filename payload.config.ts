@@ -99,7 +99,6 @@ const databaseUrl = rawDatabaseUrl ? normalizeDatabaseUrl(rawDatabaseUrl) : unde
 
 const isVercel = Boolean(process.env.VERCEL)
 const isProd = process.env.NODE_ENV === 'production'
-const shouldRunProdMigrations = process.env.PAYLOAD_RUN_MIGRATIONS === 'true'
 
 if (isVercel && databaseUrl) {
 	try {
@@ -191,6 +190,13 @@ export default buildConfig({
 			title: 'Inmemso Architecture CMS',
 			ogImage: '/thumbnail.jpg',
 		} as any,
+		components: {
+			graphics: {
+				Logo: '@/components/admin/InmemsoLogo',
+			},
+		},
+		// Use a normalized absolute path so Webpack handles it on Windows without UnhandledSchemeError
+		css: path.posix.join(dirname.replace(/\\/g, '/'), 'components/admin/admin.css'),
 		importMap: {
 			baseDir: path.resolve(dirname, 'app/(payload)/admin'),
 		},
@@ -286,10 +292,7 @@ export default buildConfig({
 		// En desarrollo: push=true para crear tablas automáticamente
 		// En producción (Vercel): push=false para evitar migraciones interactivas bloqueantes
 		push: process.env.NODE_ENV !== 'production',
-		// IMPORTANT: In serverless (Vercel) there is no interactive stdin.
-		// If the database was ever updated via dev-mode "push", Payload can prompt to run migrations.
-		// That prompt will hang the deployment. We therefore only run prod migrations when explicitly enabled.
-		prodMigrations: shouldRunProdMigrations ? migrations : undefined,
+		prodMigrations: migrations,
 		// Normalizar rutas de migración para ESM en Windows
 		migrationDir: path.resolve(dirname, 'prisma', 'migrations'),
 		pool: {

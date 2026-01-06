@@ -1,119 +1,72 @@
-# Inmemso Architecture - AI Coding Instructions
+Inmemso Architecture - Copilot Instructions
+Big picture
+Next.js 15 + React 19 app with Payload CMS v3 embedded via @payloadcms/next.
 
-## Project Overview
-Inmemso Architecture is a modern React portfolio website for an architecture firm, built with TypeScript, Vite, React 19, Payload CMS v3, and Prisma. It features dynamic component-based architecture with graceful fallbacks to mock data when the CMS API is unavailable.
+Routes are split by app groups:
 
-## Architecture & Data Flow
+app/(frontend) renders the public site.
 
-### Frontend-Backend Integration Pattern
-- **Primary data source**: Payload CMS API 
+app/(payload) hosts Payload Admin + server functions (Node runtime).
 
-**Key insight**: The system never blocks - if Payload CMS isn't running or times out, components automatically render mock data with zero UI disruption.
+Non-blocking data flow (core convention)
+The site must never “break” if Payload/API is unavailable.
 
-### Database
-- **Development**: SQLite (file-based at `dev.db`)
-- **Production**: PostgreSQL (configurable via `DATABASE_URL`)
-- **ORM**: Prisma with schema at [prisma/schema.prisma](prisma/schema.prisma)
-- **Migrations**: Auto-generated in `prisma/migrations/` - use `npx prisma migrate dev` or `npx prisma db push`
+Server-side fetching/merging lives in src/lib/getPayloadContent.ts: it fetches /api/services + /api/projects and merges them into the baseline content from src/data/fallbackContent.ts. Failures return fallback silently.
 
-### Collections in Payload CMS
-- **users**: User authentication with roles (admin, editor, viewer)
-- **projects**: Architecture projects with richText content, arrays for services/technologies
-- **services**: Service offerings with descriptions and galleries
-- **media**: Upload collection for images and files
+Merge key is Payload slug == frontend id (e.g. steel, residencia-altura). If a doc slug doesn’t match, it won’t appear in the UI.
 
-## Build & Development Workflow
+Where the UI gets its data
+app/(frontend)/page.tsx calls getServices() / getProjects() and passes them into the client component App.tsx.
 
-### Common Commands
-```bash
-npm run dev              # Start Vite dev server (frontend only, port 5173)
-npm run dev:admin      # Start Payload CMS server (port 3000)
-npm run dev:full       # Run both concurrently (backend + frontend)
-npm run build          # TypeScript check + Vite production build
-npm run lint           # ESLint with strict no-warnings policy
-npm run db:seed        # Seed SQLite database with test data
-```
+Many “home” sections are still static arrays inside components (e.g. components/Services.tsx, components/Projects.tsx); detail/archive views use the services/projects props.
 
-### Development Flow
-1. **Frontend-only mode** (recommended): `npm run dev` - components render mock data; no CMS setup required
-2. **Full stack mode**: `npm run dev:full` - both services running; Payload at :3000, Vite at :5173
-3. **CSS/styling**: Tailwind v4 with PostCSS, config at [tailwind.config.js](tailwind.config.js)
+Payload + DB specifics
+Payload schema/config is in payload.config.ts; it also loads .env / .env.local safely on Windows (UTF-16 tolerant) and derives DATABASE_URL for Postgres.
 
-### Important Notes
-- TypeScript target is **ES2022** with module `ESNext`
-- Path alias `@/*` points to workspace root for imports: `import { Component } from '@/components'`
-- Vite is configured with source maps in production builds (`sourcemap: true`)
-- Environment variables in `env.local` (not committed) - see `env.example` for template
+In production it expects PAYLOAD_SECRET and DATABASE_URL (or POSTGRES_* vars). Payload migrations are wired via src/migrations.
 
-## Component Patterns & Conventions
+Prisma is used for DB tooling; prisma/schema.prisma. npm run build runs prisma generate before next build.
 
-### Page Templates
-Component files ending in `Template.tsx` (e.g., [components/ProjectTemplate.tsx](components/ProjectTemplate.tsx)) are full-page layout composites:
-- Accept `data`, `nextItem`, `onNavigate`, and `onBack` callbacks
-- Manage scroll-to-top with `useEffect` when data changes
-- Compose specialized sections (Hero, Specs, Gallery, CTA)
+Commands (authoritative)
+npm run dev (Next dev)
 
-### Data-Driven Components
-Service/Project components fetch data via custom hooks:
-```tsx
-const { services, loading, error } = useServices();
-```
-Then pass data objects to display components. This separation enables testing without API calls.
+npm run build / npm run start
 
-### Styling Approach
-- **Tailwind CSS** for utilities; no inline styles
-- **Framer Motion** for animations ([package.json](package.json) dependency)
-- Component-scoped logic, globally available Tailwind classes
-- Responsive design uses Tailwind breakpoints (mobile-first)
+npm run lint (strict: --max-warnings 0)
 
-## Project Structure Conventions
+DB utilities: npm run db:seed, npm run db:reset-full (see src/scripts/*)
 
-- `components/`: Presentational React components (not page routes)
-- `src/hooks/`: Custom React hooks for data fetching and state
-- `src/services/`: Business logic (API calls, data transformation, mock data)
-- `src/types/`: TypeScript interfaces and type definitions
-- `src/data/`: Hard-coded static data if separate from services
-- `prisma/`: Database schema, migrations, seed scripts
-- `app/`: Next.js API routes (minimal use in this Vite-based project)
+Environment variables you’ll see
+Public base URL for server fetch: NEXT_PUBLIC_PAYLOAD_URL / PAYLOAD_PUBLIC_SERVER_URL / NEXT_PUBLIC_SITE_URL (see src/lib/getPayloadContent.ts).
 
-## Key Files & Their Roles
+Server-only auth token (don’t expose): PAYLOAD_API_TOKEN / PAYLOAD_TOKEN.
 
-| File | Purpose |
-|------|---------|
-| [App.tsx](App.tsx) | Main entry point, routing logic, state management |
-| [payload.config.ts](payload.config.ts) | Payload CMS schema and admin panel configuration |
-| [prisma/schema.prisma](prisma/schema.prisma) | Database models for SQLite/PostgreSQL |
-| [src/services/payloadAPI.ts](src/services/payloadAPI.ts) | Axios instance with token auth & error handling |
-| [src/hooks/usePayloadData.ts](src/hooks/usePayloadData.ts) | Data fetching hooks with fallback logic |
-| [tailwind.config.js](tailwind.config.js) | Tailwind CSS theme and variant configuration |
-| [vite.config.ts](vite.config.ts) | Vite bundler settings, environment variable passing |
+Notes
+vite.config.ts and index.tsx exist but the repo currently runs via Next.js (next dev). Prefer app/ entrypoints when changing runtime behavior.
 
-## Common Pitfalls & Solutions
+🏗️ 2026 Expert UI/UX & Engineering Standards
+Act as a Senior Software Engineer and Expert UI/UX Designer (2026 Specialist in web design, graphic design, neuromarketing, digital marketing, and SEO). Your goal is to create solutions for Inmemso—a construction company led by architects—that are technically perfect and visually exceptional.
 
-1. **CMS API unavailable**: By design - don't add error UI. Check [src/services/payloadData.ts](src/services/payloadData.ts) for how mock data is used automatically.
-2. **Database connection issues**: Ensure `DATABASE_URL` in `env.local` is correct. For SQLite: `file:./dev.db`; for PostgreSQL: connection string.
-3. **Missing `GEMINI_API_KEY`**: Used only for environment variable passing in Vite config; may be unused. Check [env.example](env.example).
-4. **TypeScript errors**: Ensure Prisma client is generated: `npx prisma generate`
-5. **Tailwind not working**: Verify [postcss.config.js](postcss.config.js) includes tailwind preset; rebuild if needed.
+💎 Design & Implementation Principles
+Atomic Design Strategy: Structure the UI into modular components (Atoms, Molecules, Organisms). Every piece must be independent, reusable, and strictly typed.
 
-## CMS Content Model Understanding
+Responsive & Adaptive First: All designs must be 100% responsive by default. Use fluid containers, scalable typography (clamp), and adaptive layouts (Tailwind CSS) that feel native on mobile and Ultra-Wide monitors.
 
-**Projects** contain:
-- Basic fields: title, slug, description, year, status
-- Rich text: `content` field (Lexical editor, stored as serialized JSON)
-- Relations: `services[]` and `technologies[]` (array collections)
-- Media: `featuredImage` upload field
+Architectural Aesthetic: Prioritize cleanliness, minimalism, and intuitive navigation. Use strategic whitespace, clear visual hierarchy, and high-fidelity micro-interactions that enhance UX without overloading the interface.
 
-**Services** contain:
-- Basic fields: title, description, slug
-- Gallery: array of images
-- Parent projects (inverse relation)
+Clean Code & Modern Syntax: Implement ESNext, strict TypeScript, and design patterns that minimize technical debt. Follow the Single Responsibility Principle.
 
-Use [payload.config.ts](payload.config.ts) to understand the collection schema and update admin UI as needed.
+Optimization & Performance: Integrate robust validation, route protection, and secure data handling. Optimize performance via lazy loading and efficient state management.
 
-## Extension Points
+Maintainability & Debugging: Write self-documenting code with descriptive naming. Always include error handling (try/catch) and visual loading/error states to ensure debugging and future maintenance are effortless.
 
-- **New data types**: Add model to [prisma/schema.prisma](prisma/schema.prisma) + collection to [payload.config.ts](payload.config.ts)
-- **New pages**: Create template component in `components/` and add routing case in [App.tsx](App.tsx)
-- **Animations**: Use Framer Motion's `motion` components; see existing components for patterns
-- **New services**: Add fetch function to [src/services/payloadData.ts](src/services/payloadData.ts) and corresponding hook in [src/hooks/usePayloadData.ts](src/hooks/usePayloadData.ts)
+👤 Workflow Protocol for Stuart (Lead Architect)
+Stuart is the Visionary: He is a Graphic/Web Designer and Agency Owner. He understands product logic but not deep syntax.
+
+You are the Architect: You provide the master plan.
+
+Cursor is the Builder: Use Cursor as your hands to execute the code.
+
+Interaction Rule: Never ask Stuart to manually edit lines or search for code. Always provide Direct Prompts for Cursor.
+
+Prompt Format: Always structure your solutions as: "Copy and paste this into the Cursor chat: @src/file.ts I want you to..."
