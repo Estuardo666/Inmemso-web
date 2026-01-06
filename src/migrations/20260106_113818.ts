@@ -24,25 +24,35 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "payload_preferences_rels" DROP CONSTRAINT IF EXISTS "payload_preferences_rels_parent_fk";
   ALTER TABLE "payload_preferences_rels" DROP CONSTRAINT IF EXISTS "payload_preferences_rels_users_fk";
   
+  -- Drop existing defaults before type conversion
+  ALTER TABLE "users_sessions" ALTER COLUMN "_parent_id" DROP DEFAULT;
+  ALTER TABLE "users" ALTER COLUMN "id" DROP DEFAULT;
+  ALTER TABLE "projects_services" ALTER COLUMN "_parent_id" DROP DEFAULT;
+  ALTER TABLE "projects_technologies" ALTER COLUMN "_parent_id" DROP DEFAULT;
+  ALTER TABLE "projects" ALTER COLUMN "id" DROP DEFAULT;
+  ALTER TABLE "services" ALTER COLUMN "id" DROP DEFAULT;
+  ALTER TABLE "media" ALTER COLUMN "id" DROP DEFAULT;
+  ALTER TABLE "testimonials" ALTER COLUMN "id" DROP DEFAULT;
+  ALTER TABLE "payload_kv" ALTER COLUMN "id" DROP DEFAULT;
+  ALTER TABLE "payload_locked_documents" ALTER COLUMN "id" DROP DEFAULT;
+  ALTER TABLE "payload_locked_documents_rels" ALTER COLUMN "parent_id" DROP DEFAULT;
+  ALTER TABLE "payload_preferences" ALTER COLUMN "id" DROP DEFAULT;
+  ALTER TABLE "payload_preferences_rels" ALTER COLUMN "parent_id" DROP DEFAULT;
+  ALTER TABLE "payload_migrations" ALTER COLUMN "id" DROP DEFAULT;
+  
+  -- Convert column types to uuid
   ALTER TABLE "users_sessions" ALTER COLUMN "_parent_id" SET DATA TYPE uuid USING gen_random_uuid();
   ALTER TABLE "users" ALTER COLUMN "id" SET DATA TYPE uuid USING gen_random_uuid();
-  ALTER TABLE "users" ALTER COLUMN "id" SET DEFAULT gen_random_uuid();
   ALTER TABLE "projects_services" ALTER COLUMN "_parent_id" SET DATA TYPE uuid USING gen_random_uuid();
   ALTER TABLE "projects_technologies" ALTER COLUMN "_parent_id" SET DATA TYPE uuid USING gen_random_uuid();
   ALTER TABLE "projects" ALTER COLUMN "id" SET DATA TYPE uuid USING gen_random_uuid();
-  ALTER TABLE "projects" ALTER COLUMN "id" SET DEFAULT gen_random_uuid();
   ALTER TABLE "projects" ALTER COLUMN "featured_image_id" SET DATA TYPE uuid USING NULL;
   ALTER TABLE "services" ALTER COLUMN "id" SET DATA TYPE uuid USING gen_random_uuid();
-  ALTER TABLE "services" ALTER COLUMN "id" SET DEFAULT gen_random_uuid();
   ALTER TABLE "services" ALTER COLUMN "featured_image_id" SET DATA TYPE uuid USING NULL;
   ALTER TABLE "media" ALTER COLUMN "id" SET DATA TYPE uuid USING gen_random_uuid();
-  ALTER TABLE "media" ALTER COLUMN "id" SET DEFAULT gen_random_uuid();
   ALTER TABLE "testimonials" ALTER COLUMN "id" SET DATA TYPE uuid USING gen_random_uuid();
-  ALTER TABLE "testimonials" ALTER COLUMN "id" SET DEFAULT gen_random_uuid();
   ALTER TABLE "payload_kv" ALTER COLUMN "id" SET DATA TYPE uuid USING gen_random_uuid();
-  ALTER TABLE "payload_kv" ALTER COLUMN "id" SET DEFAULT gen_random_uuid();
   ALTER TABLE "payload_locked_documents" ALTER COLUMN "id" SET DATA TYPE uuid USING gen_random_uuid();
-  ALTER TABLE "payload_locked_documents" ALTER COLUMN "id" SET DEFAULT gen_random_uuid();
   ALTER TABLE "payload_locked_documents_rels" ALTER COLUMN "parent_id" SET DATA TYPE uuid USING gen_random_uuid();
   ALTER TABLE "payload_locked_documents_rels" ALTER COLUMN "users_id" SET DATA TYPE uuid USING NULL;
   ALTER TABLE "payload_locked_documents_rels" ALTER COLUMN "projects_id" SET DATA TYPE uuid USING NULL;
@@ -50,10 +60,24 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "payload_locked_documents_rels" ALTER COLUMN "media_id" SET DATA TYPE uuid USING NULL;
   ALTER TABLE "payload_locked_documents_rels" ALTER COLUMN "testimonials_id" SET DATA TYPE uuid USING NULL;
   ALTER TABLE "payload_preferences" ALTER COLUMN "id" SET DATA TYPE uuid USING gen_random_uuid();
-  ALTER TABLE "payload_preferences" ALTER COLUMN "id" SET DEFAULT gen_random_uuid();
   ALTER TABLE "payload_preferences_rels" ALTER COLUMN "parent_id" SET DATA TYPE uuid USING gen_random_uuid();
   ALTER TABLE "payload_preferences_rels" ALTER COLUMN "users_id" SET DATA TYPE uuid USING NULL;
   ALTER TABLE "payload_migrations" ALTER COLUMN "id" SET DATA TYPE uuid USING gen_random_uuid();
+  
+  -- Add back defaults after type conversion
+  ALTER TABLE "users_sessions" ALTER COLUMN "_parent_id" SET DEFAULT gen_random_uuid();
+  ALTER TABLE "users" ALTER COLUMN "id" SET DEFAULT gen_random_uuid();
+  ALTER TABLE "projects_services" ALTER COLUMN "_parent_id" SET DEFAULT gen_random_uuid();
+  ALTER TABLE "projects_technologies" ALTER COLUMN "_parent_id" SET DEFAULT gen_random_uuid();
+  ALTER TABLE "projects" ALTER COLUMN "id" SET DEFAULT gen_random_uuid();
+  ALTER TABLE "services" ALTER COLUMN "id" SET DEFAULT gen_random_uuid();
+  ALTER TABLE "media" ALTER COLUMN "id" SET DEFAULT gen_random_uuid();
+  ALTER TABLE "testimonials" ALTER COLUMN "id" SET DEFAULT gen_random_uuid();
+  ALTER TABLE "payload_kv" ALTER COLUMN "id" SET DEFAULT gen_random_uuid();
+  ALTER TABLE "payload_locked_documents" ALTER COLUMN "id" SET DEFAULT gen_random_uuid();
+  ALTER TABLE "payload_locked_documents_rels" ALTER COLUMN "parent_id" SET DEFAULT gen_random_uuid();
+  ALTER TABLE "payload_preferences" ALTER COLUMN "id" SET DEFAULT gen_random_uuid();
+  ALTER TABLE "payload_preferences_rels" ALTER COLUMN "parent_id" SET DEFAULT gen_random_uuid();
   ALTER TABLE "payload_migrations" ALTER COLUMN "id" SET DEFAULT gen_random_uuid();
   ALTER TABLE "media" ADD COLUMN "url" varchar;
   ALTER TABLE "media" ADD COLUMN "thumbnail_u_r_l" varchar;
