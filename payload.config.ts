@@ -394,7 +394,7 @@ export default buildConfig({
 		// PRODUCTION SAFETY: In development (push: true), Payload creates tables automatically.
 		// In production (push: false), only precompiled migrations from src/migrations/ are applied.
 		// This prevents interactive prompts during Vercel builds.
-		push: isProd ? false : true,
+		push: process.env.PAYLOAD_PUSH === 'true' ? true : (isProd ? false : true),
 		// Use precompiled migrations in production (no interactive prompts)
 		prodMigrations: migrations,
 		// Normalized migration directory path for ESM + Windows compatibility
