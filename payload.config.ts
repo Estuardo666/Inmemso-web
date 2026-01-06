@@ -6,7 +6,7 @@ import fs from 'fs'
 import path from 'path'
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'url'
-import { v2 as cloudinarySDK } from 'cloudinary'
+import { v2 as cloudinarySDK, type UploadApiOptions } from 'cloudinary'
 import { migrations } from './src/migrations'
 
 const filename = fileURLToPath(import.meta.url)
@@ -134,7 +134,7 @@ const makeCloudinaryAdapter = () => {
 					.filter(Boolean)
 					.join('/')
 
-				const uploadOptions = {
+				const uploadOptions: UploadApiOptions = {
 					folder: 'inmemso-architecture',
 					resource_type: 'auto',
 					public_id: publicId,
