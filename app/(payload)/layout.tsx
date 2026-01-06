@@ -2,17 +2,17 @@ import React from 'react'
 import { handleServerFunctions, RootLayout } from '@payloadcms/next/layouts'
 import config from '@/payload.config'
 
+import { importMap as generatedImportMap } from './admin/importMap.js'
+
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
-
-const importMap = {}
 
 async function serverFunction(args: { name: string; args: Record<string, unknown> }) {
   'use server'
   return handleServerFunctions({
     ...args,
     config,
-    importMap,
+    importMap: generatedImportMap,
   })
 }
 
@@ -22,7 +22,7 @@ export default function PayloadLayout({
   return (
     <RootLayout
       config={config}
-      importMap={importMap}
+      importMap={generatedImportMap}
       serverFunction={serverFunction}
     >
       {children}

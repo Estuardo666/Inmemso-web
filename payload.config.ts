@@ -33,8 +33,9 @@ function loadEnvFile(filePath: string, override: boolean) {
 	const buffer = fs.readFileSync(filePath)
 	const raw = decodeEnvFile(buffer).replace(/^\uFEFF/, '')
 	const parsed = dotenv.parse(raw)
+	const env = process.env as Record<string, string | undefined>
 	for (const [key, value] of Object.entries(parsed)) {
-		if (override || process.env[key] === undefined) process.env[key] = value
+		if (override || env[key] === undefined) env[key] = String(value)
 	}
 }
 
@@ -189,6 +190,9 @@ export default buildConfig({
 			title: 'Inmemso Architecture CMS',
 			ogImage: '/thumbnail.jpg',
 		} as any,
+		importMap: {
+			baseDir: path.resolve(dirname, 'app/(payload)/admin'),
+		},
 	},
 	collections: [
 		{

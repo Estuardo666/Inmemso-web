@@ -18,6 +18,7 @@ const nextConfig = {
   transpilePackages: [
     '@payloadcms/next',
     '@payloadcms/richtext-lexical',
+    '@payloadcms/ui',
     'react-image-crop',
   ],
 

@@ -1,14 +1,14 @@
-import React from 'react'
-
 export default function PayloadLoading() {
-  // Loading mínimo para evitar dependencias visuales del frontend.
   return (
-    <html lang="es">
-      <body>
-        <main>
-          <p>Cargando Admin…</p>
-        </main>
-      </body>
-    </html>
+    <div style={{ 
+      display: 'flex', 
+      justifyContent: 'center', 
+      alignItems: 'center', 
+      height: '100vh', 
+      backgroundColor: '#111', 
+      color: 'white' 
+    }}>
+      <p>Cargando Panel de Administración...</p>
+    </div>
   )
 }
