@@ -124,38 +124,50 @@ const makeCloudinaryAdapter = () => {
 					resource_type: 'auto',
 				}),
 			handleUpload: async ({ file, data }: { clientUploadContext?: unknown; collection: any; data: any; file: any; req?: any }) => {
-				const uniqueSuffix = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
-				const sanitizedFilename = file.filename.replace(/\s+/g, '-')
-				const publicId = [
-					'inmemso-architecture',
-					prefix,
-					`${sanitizedFilename}-${uniqueSuffix}`,
-				]
-					.filter(Boolean)
-					.join('/')
+				try {
+					const uniqueSuffix = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
+					const sanitizedFilename = file.filename.replace(/\s+/g, '-')
+					const publicId = [
+						'inmemso-architecture',
+						prefix,
+						`${sanitizedFilename}-${uniqueSuffix}`,
+					]
+						.filter(Boolean)
+						.join('/')
 
-				const uploadOptions: UploadApiOptions = {
-					folder: 'inmemso-architecture',
-					resource_type: 'auto',
-					public_id: publicId,
-				}
+					const uploadOptions: UploadApiOptions = {
+						folder: 'inmemso-architecture',
+						resource_type: 'auto',
+						public_id: publicId,
+					}
 
-				const result = await new Promise<any>((resolve, reject) => {
-					const stream = cloudinarySDK.uploader.upload_stream(uploadOptions, (err, res) => {
-						if (err || !res) return reject(err)
-						return resolve(res)
+					// Use upload_stream with proper callback handling
+					const result = await new Promise<any>((resolve, reject) => {
+						const uploadStream = cloudinarySDK.uploader.upload_stream(uploadOptions, (error, result) => {
+							if (error) reject(error)
+							else resolve(result)
+						})
+
+						uploadStream.on('error', (err) => reject(err))
+						uploadStream.end(file.buffer)
 					})
-					stream.end(file.buffer)
-				})
 
-				// Persist Cloudinary identifiers in the stored document
-				;(data as any).filename = result.public_id
-				;(data as any).url = result.secure_url
+					// Persist Cloudinary identifiers in the stored document
+					;(data as any).filename = result.public_id
+					;(data as any).url = result.secure_url
+				} catch (err) {
+					console.error('[Cloudinary] Upload error:', err)
+					throw err
+				}
 			},
 			handleDelete: async ({ doc }: { collection: any; doc: any; filename: string }) => {
-				const publicId = (doc as any)?.filename || (doc as any)?.cloudinaryPublicId
-				if (!publicId) return
-				await cloudinarySDK.uploader.destroy(publicId, { resource_type: 'auto' })
+				try {
+					const publicId = (doc as any)?.filename || (doc as any)?.cloudinaryPublicId
+					if (!publicId) return
+					await cloudinarySDK.uploader.destroy(publicId, { resource_type: 'auto' })
+				} catch (err) {
+					console.error('[Cloudinary] Delete error:', err)
+				}
 			},
 			staticHandler: async (
 				_req: any,
