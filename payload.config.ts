@@ -1,10 +1,12 @@
 import { buildConfig } from 'payload'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { postgresAdapter } from '@payloadcms/db-postgres'
+import { cloudStorage } from '@payloadcms/plugin-cloud-storage'
 import fs from 'fs'
 import path from 'path'
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'url'
+import { v2 as cloudinarySDK } from 'cloudinary'
 import { migrations } from './src/migrations'
 
 const filename = fileURLToPath(import.meta.url)
@@ -100,6 +102,75 @@ const databaseUrl = rawDatabaseUrl ? normalizeDatabaseUrl(rawDatabaseUrl) : unde
 const isVercel = Boolean(process.env.VERCEL)
 const isProd = process.env.NODE_ENV === 'production'
 
+cloudinarySDK.config({
+	cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+	api_key: process.env.CLOUDINARY_API_KEY,
+	api_secret: process.env.CLOUDINARY_API_SECRET,
+	secure: true,
+})
+
+const makeCloudinaryAdapter = () => {
+	return ({ collection: _collection, prefix }: { collection: any; prefix?: string }) => {
+		return {
+			name: 'cloudinary',
+			onInit: () => {
+				if (!process.env.CLOUDINARY_CLOUD_NAME) {
+					console.warn('[Cloudinary] Missing CLOUDINARY_* env vars; media uploads will fail.')
+				}
+			},
+			generateURL: ({ filename }: { collection: any; data: any; filename: string; prefix?: string }) =>
+				cloudinarySDK.url(filename, {
+					secure: true,
+					resource_type: 'auto',
+				}),
+			handleUpload: async ({ file, data }: { clientUploadContext?: unknown; collection: any; data: any; file: any; req?: any }) => {
+				const uniqueSuffix = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
+				const sanitizedFilename = file.filename.replace(/\s+/g, '-')
+				const publicId = [
+					'inmemso-architecture',
+					prefix,
+					`${sanitizedFilename}-${uniqueSuffix}`,
+				]
+					.filter(Boolean)
+					.join('/')
+
+				const uploadOptions = {
+					folder: 'inmemso-architecture',
+					resource_type: 'auto',
+					public_id: publicId,
+				}
+
+				const result = await new Promise<any>((resolve, reject) => {
+					const stream = cloudinarySDK.uploader.upload_stream(uploadOptions, (err, res) => {
+						if (err || !res) return reject(err)
+						return resolve(res)
+					})
+					stream.end(file.buffer)
+				})
+
+				// Persist Cloudinary identifiers in the stored document
+				;(data as any).filename = result.public_id
+				;(data as any).url = result.secure_url
+			},
+			handleDelete: async ({ doc }: { collection: any; doc: any; filename: string }) => {
+				const publicId = (doc as any)?.filename || (doc as any)?.cloudinaryPublicId
+				if (!publicId) return
+				await cloudinarySDK.uploader.destroy(publicId, { resource_type: 'auto' })
+			},
+			staticHandler: async (
+				_req: any,
+				{ params }: { doc?: any; headers?: Headers; params: { filename: string; collection?: string; clientUploadContext?: unknown } },
+			) => {
+				const url = cloudinarySDK.url(params.filename, {
+					secure: true,
+					resource_type: 'auto',
+				})
+				return Response.redirect(url, 302)
+			},
+		}
+	}
+}
+
 if (isVercel && databaseUrl) {
 	try {
 		const parsed = new URL(databaseUrl)
@@ -184,6 +255,15 @@ export default buildConfig({
 	serverURL: payloadServerURL,
 	csrf: getAllowedOrigins(),
 	cors: getAllowedOrigins(),
+	plugins: [
+		cloudStorage({
+			collections: {
+				media: {
+					adapter: makeCloudinaryAdapter(),
+				},
+			},
+		}),
+	],
 	admin: {
 		user: 'users',
 		meta: {
@@ -199,6 +279,22 @@ export default buildConfig({
 			baseDir: path.resolve(dirname, 'app/(payload)/admin'),
 		},
 	},
+	globals: [
+		{
+			slug: 'site-settings',
+			fields: [
+				{
+					name: 'adminLogo',
+					type: 'upload',
+					relationTo: 'media',
+				},
+				{
+					name: 'primaryColor',
+					type: 'text',
+				},
+			],
+		},
+	],
 	collections: [
 		{
 			slug: 'users',
@@ -266,6 +362,7 @@ export default buildConfig({
 			access: {
 				read: () => true,
 			},
+			upload: true,
 			fields: [
 				{ name: 'alt', type: 'text', required: true },
 			],
