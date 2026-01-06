@@ -1,7 +1,7 @@
 import { buildConfig } from 'payload'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { postgresAdapter } from '@payloadcms/db-postgres'
-import { cloudStorage } from '@payloadcms/plugin-cloud-storage'
+import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 import fs from 'fs'
 import path from 'path'
 import dotenv from 'dotenv'
@@ -256,7 +256,7 @@ export default buildConfig({
 	csrf: getAllowedOrigins(),
 	cors: getAllowedOrigins(),
 	plugins: [
-		cloudStorage({
+		cloudStoragePlugin({
 			collections: {
 				media: {
 					adapter: makeCloudinaryAdapter(),
@@ -303,7 +303,7 @@ export default buildConfig({
 				{
 					name: 'name',
 					type: 'text',
-					required: true,
+					defaultValue: 'User',
 				},
 				{
 					name: 'role',
