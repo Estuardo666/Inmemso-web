@@ -195,8 +195,6 @@ export default buildConfig({
 				Logo: '@/components/admin/InmemsoLogo',
 			},
 		},
-		// Use a normalized absolute path so Webpack handles it on Windows without UnhandledSchemeError
-		css: path.posix.join(dirname.replace(/\\/g, '/'), 'components/admin/admin.css'),
 		importMap: {
 			baseDir: path.resolve(dirname, 'app/(payload)/admin'),
 		},
