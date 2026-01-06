@@ -2,7 +2,7 @@
   "buildCommand": "npm run build",
   "installCommand": "npm install",
   "env": {
-    "PAYLOAD_PUSH": "true",
+    "PAYLOAD_PUSH": "false",
     "PAYLOAD_RUN_MIGRATIONS": "false"
   }
 }
