@@ -12,7 +12,7 @@ const getDatabaseUrl = (): string => {
 		process.env.POSTGRES_URL,
 	]
 		.map((v) => v?.trim())
-		.filter(Boolean)
+		.filter((v): v is string => Boolean(v))
 
 	if (!candidates.length) {
 		throw new Error('No DATABASE_URL found in .env or .env.local')

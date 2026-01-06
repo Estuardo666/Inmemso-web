@@ -23,6 +23,12 @@ const nextConfig = {
   ],
 
   webpack: (config) => {
+    config.resolve = config.resolve || {}
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      '@payload-config': path.resolve(__dirname, 'payload.config.ts'),
+    }
+
     // Payload ships a dynamic require in its job runner. Webpack warns about it,
     // but it is expected and safe to ignore for Next builds.
     config.ignoreWarnings = [
