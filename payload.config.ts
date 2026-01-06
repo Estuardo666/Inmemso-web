@@ -296,13 +296,9 @@ export default buildConfig({
 			slug: 'site-settings',
 			fields: [
 				{
-					name: 'adminLogo',
-					type: 'upload',
-					relationTo: 'media',
-				},
-				{
 					name: 'primaryColor',
 					type: 'text',
+					defaultValue: '#1a1a1a',
 				},
 			],
 		},
@@ -311,12 +307,11 @@ export default buildConfig({
 		{
 			slug: 'users',
 			auth: true,
+			admin: {
+				useAsTitle: 'email',
+				defaultColumns: ['email', 'role', 'updatedAt'],
+			},
 			fields: [
-				{
-					name: 'name',
-					type: 'text',
-					defaultValue: 'User',
-				},
 				{
 					name: 'role',
 					type: 'select',

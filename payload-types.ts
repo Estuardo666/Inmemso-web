@@ -132,7 +132,6 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: string;
-  name?: string | null;
   role?: ('admin' | 'editor' | 'viewer') | null;
   updatedAt: string;
   createdAt: string;
@@ -347,7 +346,6 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
-  name?: T;
   role?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -484,7 +482,6 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface SiteSetting {
   id: string;
-  adminLogo?: (string | null) | Media;
   primaryColor?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -494,7 +491,6 @@ export interface SiteSetting {
  * via the `definition` "site-settings_select".
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
-  adminLogo?: T;
   primaryColor?: T;
   updatedAt?: T;
   createdAt?: T;
