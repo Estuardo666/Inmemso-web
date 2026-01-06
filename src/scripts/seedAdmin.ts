@@ -35,7 +35,6 @@ async function seedAdmin() {
 			data: {
 				email: 'estuarlito@gmail.com',
 				password: 'LOXAliberis9713',
-				name: 'Stuart',
 				role: 'admin',
 			},
 		})
@@ -43,7 +42,6 @@ async function seedAdmin() {
 		console.log('[Seed] ✅ Usuario creado exitosamente:')
 		console.log(`  - ID: ${newUser.id}`)
 		console.log(`  - Email: ${newUser.email}`)
-		console.log(`  - Name: ${newUser.name}`)
 		console.log(`  - Role: ${newUser.role}`)
 		console.log('[Seed] 🎉 Seed completado.')
 		process.exit(0)
