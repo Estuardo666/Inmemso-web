@@ -391,7 +391,7 @@ export default buildConfig({
 		// In production (push: false), only precompiled migrations from src/migrations/ are applied.
 		// This prevents interactive prompts during Vercel builds.
 		// TEMP: Set to false in dev to prevent data loss during schema changes
-		push: false,
+		push: process.env.NODE_ENV !== 'production',
 		// Use precompiled migrations only when explicitly allowed.
 		// On Vercel (serverless) this stays disabled to avoid runtime mutations.
 		prodMigrations: shouldRunProdMigrations ? migrations : [],
