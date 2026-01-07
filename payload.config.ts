@@ -303,7 +303,7 @@ export default buildConfig({
 						if ((operation === 'create' || operation === 'update') && req?.file) {
 							try {
 								const file = req.file
-								const buffer = file.data || file.buffer
+								const buffer = file.data
 								if (!buffer) throw new Error('No file buffer')
 
 								const uniqueSuffix = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
