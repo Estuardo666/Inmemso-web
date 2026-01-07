@@ -307,7 +307,7 @@ export default buildConfig({
 								if (!buffer) throw new Error('No file buffer')
 
 								const uniqueSuffix = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
-								const sanitizedFilename = (file.filename || file.name || 'media').replace(/\s+/g, '-')
+								const sanitizedFilename = (file.name || 'media').replace(/\s+/g, '-')
 								const publicId = `inmemso-architecture/${sanitizedFilename}-${uniqueSuffix}`
 
 								const result = await new Promise<any>((resolve, reject) => {
@@ -328,7 +328,7 @@ export default buildConfig({
 								// Store Cloudinary URL and metadata
 								data.url = result.secure_url
 								data.filename = result.public_id
-								data.mimeType = file.mimetype || file.mimeType
+								data.mimeType = file.mimetype
 								data.width = result.width
 								data.height = result.height
 								data.filesize = result.bytes
