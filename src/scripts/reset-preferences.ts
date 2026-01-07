@@ -4,6 +4,9 @@ import dotenv from 'dotenv'
 dotenv.config({ path: '.env.local' })
 dotenv.config({ path: '.env' })
 
+// Safety note: Limpieza de tablas internas de Payload. Solo corre con ALLOW_DESTRUCTIVE=1
+// y se bloquea en Vercel/producción para evitar wipes en deploy.
+
 const ensureDestructiveAllowed = () => {
 	const isProd =
 		process.env.NODE_ENV === 'production' || process.env.VERCEL === '1'

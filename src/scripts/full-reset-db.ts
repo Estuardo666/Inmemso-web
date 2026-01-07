@@ -4,6 +4,9 @@ import dotenv from 'dotenv'
 dotenv.config({ path: '.env.local' })
 dotenv.config({ path: '.env' })
 
+// Safety note: Este script fue el que vaciaba la DB al correrlo en entornos erróneos.
+// Ahora exige ALLOW_DESTRUCTIVE=1 y bloquea en Vercel/producción, evitando wipes involuntarios.
+
 const ensureDestructiveAllowed = () => {
 	const isProd =
 		process.env.NODE_ENV === 'production' || process.env.VERCEL === '1'

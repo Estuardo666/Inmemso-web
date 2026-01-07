@@ -4,6 +4,9 @@ import dotenv from 'dotenv'
 dotenv.config({ path: '.env.local' })
 dotenv.config({ path: '.env' })
 
+// Safety note: Script de limpieza puntual de tablas. Ahora requiere ALLOW_DESTRUCTIVE=1
+// y bloquea en Vercel/producción para impedir borrados accidentales en deploy.
+
 const ensureDestructiveAllowed = () => {
 	const isProd =
 		process.env.NODE_ENV === 'production' || process.env.VERCEL === '1'
