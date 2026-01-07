@@ -4,6 +4,22 @@ import dotenv from 'dotenv'
 dotenv.config({ path: '.env.local' })
 dotenv.config({ path: '.env' })
 
+const ensureDestructiveAllowed = () => {
+	const isProd =
+		process.env.NODE_ENV === 'production' || process.env.VERCEL === '1'
+	if (isProd) {
+		console.error('❌ RESET bloqueado: entorno de producción detectado.')
+		process.exit(1)
+	}
+
+	if (process.env.ALLOW_DESTRUCTIVE !== '1') {
+		console.error(
+			'❌ RESET bloqueado: define ALLOW_DESTRUCTIVE=1 para ejecutar de forma explícita.',
+		)
+		process.exit(1)
+	}
+}
+
 const getDatabaseUrl = (): string => {
 	const candidates = [
 		process.env.DATABASE_URL_UNPOOLED,
@@ -21,6 +37,8 @@ const getDatabaseUrl = (): string => {
 }
 
 async function fullReset() {
+	ensureDestructiveAllowed()
+
 	const connectionString = getDatabaseUrl()
 	const client = new Client({
 		connectionString,

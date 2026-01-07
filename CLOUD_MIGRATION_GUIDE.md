@@ -136,10 +136,10 @@ Clear-History
 # O simplemente cierra y abre una nueva terminal
 ```
 
-### Resetear la Base de Datos Cloud
+### ear la Base de Datos Cloud
 ```bash
 # Si necesitas empezar de cero:
-npx prisma db push --force-reset
+npx prisma db push --force-
 npx ts-node prisma/migrate-data.ts
 ```
 
