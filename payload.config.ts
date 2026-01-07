@@ -387,14 +387,12 @@ export default buildConfig({
 	editor: lexicalEditor({}),
 	db: postgresAdapter({
 		idType: 'uuid',
-		// PRODUCTION SAFETY: In development (push: true), Payload creates tables automatically.
-		// In production (push: false), only precompiled migrations from src/migrations/ are applied.
-		// This prevents interactive prompts during Vercel builds.
-		// TEMP: Set to false in dev to prevent data loss during schema changes
-		push: process.env.NODE_ENV !== 'production',
-		// Use precompiled migrations only when explicitly allowed.
-		// On Vercel (serverless) this stays disabled to avoid runtime mutations.
-		prodMigrations: shouldRunProdMigrations ? migrations : [],
+		// CRITICAL: Always use migrations, never push: true (which drops/recreates tables)
+		// This prevents data loss and allows explicit control over schema changes
+		push: false,
+		// Always apply migrations in both dev and production
+		// Migrations are idempotent and safe to run multiple times
+		prodMigrations: migrations,
 		// Normalized migration directory path for ESM + Windows compatibility
 		migrationDir: path.resolve(dirname, 'src', 'migrations'),
 		pool: {
