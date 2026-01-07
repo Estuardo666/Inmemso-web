@@ -100,6 +100,9 @@ const databaseUrl = rawDatabaseUrl ? normalizeDatabaseUrl(rawDatabaseUrl) : unde
 
 const isVercel = Boolean(process.env.VERCEL)
 const isProd = process.env.NODE_ENV === 'production'
+// ABSOLUTE SAFETY: never run migrations automatically on Vercel/public runtime.
+// Allow manual opt-in only via PAYLOAD_RUN_MIGRATIONS=1 when NOT on Vercel.
+const shouldRunProdMigrations = process.env.PAYLOAD_RUN_MIGRATIONS === '1' && !isVercel
 
 cloudinarySDK.config({
 	cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -389,8 +392,9 @@ export default buildConfig({
 		// This prevents interactive prompts during Vercel builds.
 		// TEMP: Set to false in dev to prevent data loss during schema changes
 		push: false,
-		// Use precompiled migrations in production (no interactive prompts)
-		prodMigrations: migrations,
+		// Use precompiled migrations only when explicitly allowed.
+		// On Vercel (serverless) this stays disabled to avoid runtime mutations.
+		prodMigrations: shouldRunProdMigrations ? migrations : [],
 		// Normalized migration directory path for ESM + Windows compatibility
 		migrationDir: path.resolve(dirname, 'src', 'migrations'),
 		pool: {
