@@ -1,12 +1,11 @@
 import { buildConfig } from 'payload'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { postgresAdapter } from '@payloadcms/db-postgres'
-import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 import fs from 'fs'
 import path from 'path'
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'url'
-import { v2 as cloudinarySDK, type UploadApiOptions } from 'cloudinary'
+import { v2 as cloudinarySDK } from 'cloudinary'
 import { migrations } from './src/migrations'
 
 const filename = fileURLToPath(import.meta.url)
@@ -109,79 +108,6 @@ cloudinarySDK.config({
 	secure: true,
 })
 
-const makeCloudinaryAdapter = () => {
-	return ({ collection: _collection, prefix }: { collection: any; prefix?: string }) => {
-		return {
-			name: 'cloudinary',
-			onInit: () => {
-				if (!process.env.CLOUDINARY_CLOUD_NAME) {
-					console.warn('[Cloudinary] Missing CLOUDINARY_* env vars; media uploads will fail.')
-				}
-			},
-			generateURL: ({ filename }: { collection: any; data: any; filename: string; prefix?: string }) =>
-				cloudinarySDK.url(filename, {
-					secure: true,
-					resource_type: 'auto',
-				}),
-			handleUpload: async ({ file, data }: { clientUploadContext?: unknown; collection: any; data: any; file: any; req?: any }) => {
-				try {
-					const uniqueSuffix = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
-					const sanitizedFilename = file.filename.replace(/\s+/g, '-')
-					const publicId = [
-						'inmemso-architecture',
-						prefix,
-						`${sanitizedFilename}-${uniqueSuffix}`,
-					]
-						.filter(Boolean)
-						.join('/')
-
-					const uploadOptions: UploadApiOptions = {
-						folder: 'inmemso-architecture',
-						resource_type: 'auto',
-						public_id: publicId,
-					}
-
-					// Use upload_stream with proper callback handling
-					const result = await new Promise<any>((resolve, reject) => {
-						const uploadStream = cloudinarySDK.uploader.upload_stream(uploadOptions, (error, result) => {
-							if (error) reject(error)
-							else resolve(result)
-						})
-
-						uploadStream.on('error', (err) => reject(err))
-						uploadStream.end(file.buffer)
-					})
-
-					// Persist Cloudinary identifiers in the stored document
-					;(data as any).filename = result.public_id
-					;(data as any).url = result.secure_url
-				} catch (err) {
-					console.error('[Cloudinary] Upload error:', err)
-					throw err
-				}
-			},
-			handleDelete: async ({ doc }: { collection: any; doc: any; filename: string }) => {
-				try {
-					const publicId = (doc as any)?.filename || (doc as any)?.cloudinaryPublicId
-					if (!publicId) return
-					await cloudinarySDK.uploader.destroy(publicId, { resource_type: 'auto' })
-				} catch (err) {
-					console.error('[Cloudinary] Delete error:', err)
-				}
-			},
-			staticHandler: async (
-				_req: any,
-				{ params }: { doc?: any; headers?: Headers; params: { filename: string; collection?: string; clientUploadContext?: unknown } },
-			) => {
-				const url = cloudinarySDK.url(params.filename, {
-					secure: true,
-					resource_type: 'auto',
-				})
-				return Response.redirect(url, 302)
-			},
-		}
-	}
-}
 
 if (isVercel && databaseUrl) {
 	try {
@@ -267,15 +193,7 @@ export default buildConfig({
 	serverURL: payloadServerURL,
 	csrf: getAllowedOrigins(),
 	cors: getAllowedOrigins(),
-	plugins: [
-		cloudStoragePlugin({
-			collections: {
-				media: {
-					adapter: makeCloudinaryAdapter(),
-				},
-			},
-		}),
-	],
+	plugins: [],
 	admin: {
 		user: 'users',
 		meta: {
@@ -369,9 +287,84 @@ export default buildConfig({
 			access: {
 				read: () => true,
 			},
-			upload: true,
+			upload: {
+				disableLocalStorage: true,
+				mimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+				imageSizes: [], // No resizing, use Cloudinary transformations
+			},
+			admin: {
+				useAsTitle: 'filename',
+				defaultColumns: ['filename', 'url', 'createdAt'],
+			},
+			hooks: {
+				beforeChange: [
+					async ({ data, req, operation }) => {
+						// Upload to Cloudinary when creating/updating media with file
+						if ((operation === 'create' || operation === 'update') && req?.file) {
+							try {
+								const file = req.file
+								const buffer = file.data || file.buffer
+								if (!buffer) throw new Error('No file buffer')
+
+								const uniqueSuffix = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
+								const sanitizedFilename = (file.filename || file.name || 'media').replace(/\s+/g, '-')
+								const publicId = `inmemso-architecture/${sanitizedFilename}-${uniqueSuffix}`
+
+								const result = await new Promise<any>((resolve, reject) => {
+									const uploadStream = cloudinarySDK.uploader.upload_stream(
+										{
+											folder: 'inmemso-architecture',
+											resource_type: 'auto',
+											public_id: publicId,
+										},
+										(error, result) => {
+											if (error) reject(error)
+											else resolve(result)
+										}
+									)
+									uploadStream.end(buffer)
+								})
+
+								// Store Cloudinary URL and metadata
+								data.url = result.secure_url
+								data.filename = result.public_id
+								data.mimeType = file.mimetype || file.mimeType
+								data.width = result.width
+								data.height = result.height
+								data.filesize = result.bytes
+								
+								console.log('[Cloudinary] Upload success:', { url: data.url, filename: data.filename })
+							} catch (err) {
+								console.error('[Cloudinary] Upload error:', err)
+								throw new Error(`Failed to upload to Cloudinary: ${(err as any)?.message}`)
+							}
+						}
+						return data
+					},
+				],
+				afterRead: [
+					async ({ doc }) => {
+						// Force Payload to always return Cloudinary URL, never /api/media/file/
+						if (doc && doc.url && typeof doc.url === 'string' && doc.url.startsWith('https://res.cloudinary.com')) {
+							// URL is already Cloudinary, keep it
+							return doc
+						}
+						// If filename exists, reconstruct Cloudinary URL from it
+						if (doc && doc.filename && typeof doc.filename === 'string') {
+							doc.url = `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/${doc.filename}`
+						}
+						return doc
+					},
+				],
+			},
 			fields: [
 				{ name: 'alt', type: 'text', required: true },
+				{ name: 'url', type: 'text', admin: { readOnly: true } },
+				{ name: 'filename', type: 'text', admin: { readOnly: true } },
+				{ name: 'mimeType', type: 'text', admin: { readOnly: true } },
+				{ name: 'width', type: 'number', admin: { readOnly: true } },
+				{ name: 'height', type: 'number', admin: { readOnly: true } },
+				{ name: 'filesize', type: 'number', admin: { readOnly: true } },
 			],
 		},
 		{
@@ -394,7 +387,8 @@ export default buildConfig({
 		// PRODUCTION SAFETY: In development (push: true), Payload creates tables automatically.
 		// In production (push: false), only precompiled migrations from src/migrations/ are applied.
 		// This prevents interactive prompts during Vercel builds.
-		push: process.env.PAYLOAD_PUSH === 'true' ? true : (isProd ? false : true),
+		// TEMP: Set to false in dev to prevent data loss during schema changes
+		push: false,
 		// Use precompiled migrations in production (no interactive prompts)
 		prodMigrations: migrations,
 		// Normalized migration directory path for ESM + Windows compatibility
