@@ -16,7 +16,7 @@
   },
   "scripts": {
     "dev": "next dev --turbo",
-    "build": "prisma generate && next build && echo 'Build completed successfully'",
+    "build": "prisma generate && node scripts/migrate-or-skip.mjs && next build && echo 'Build completed successfully'",
     "start": "next start",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "clean-cache": "powershell -Command \"if (Test-Path .next) { Remove-Item -Recurse -Force .next }; Write-Host 'Cache cleared. Run npm run dev to restart' -ForegroundColor Green\"",

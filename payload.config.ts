@@ -694,9 +694,9 @@ export default buildConfig({
 	editor: lexicalEditor({}),
 	db: postgresAdapter({
 		idType: 'uuid',
-		// Force push everywhere to avoid interactive prompts in serverless
-		push: true,
-		// Migrations remain available but push will keep schema in sync
+		// Use migrations (no push) to avoid dev-mode prompts
+		push: false,
+		// Migrations will be applied during build (Vercel) via npx payload migrate --yes
 		prodMigrations: migrations,
 		// Normalized migration directory path for ESM + Windows compatibility
 		migrationDir: path.resolve(dirname, 'src', 'migrations'),
