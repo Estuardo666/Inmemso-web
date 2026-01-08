@@ -694,10 +694,9 @@ export default buildConfig({
 	editor: lexicalEditor({}),
 	db: postgresAdapter({
 		idType: 'uuid',
-		// CRITICAL: Use push: true in Vercel to auto-sync schema without prompts
-		// In serverless (no STDIN), push mode will apply changes automatically
-		push: isVercel ? true : false,
-		// Fallback: migrations for local dev
+		// Force push everywhere to avoid interactive prompts in serverless
+		push: true,
+		// Migrations remain available but push will keep schema in sync
 		prodMigrations: migrations,
 		// Normalized migration directory path for ESM + Windows compatibility
 		migrationDir: path.resolve(dirname, 'src', 'migrations'),
