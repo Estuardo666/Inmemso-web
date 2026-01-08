@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import { FALLBACK_PROJECTS, FALLBACK_SERVICES } from './src/data/fallbackContent';
+import { FALLBACK_PROJECTS, FALLBACK_SERVICES, FALLBACK_HOME } from './src/data/fallbackContent';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -11,6 +11,6 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <App services={Object.values(FALLBACK_SERVICES)} projects={FALLBACK_PROJECTS} />
+    <App services={Object.values(FALLBACK_SERVICES)} projects={FALLBACK_PROJECTS} home={FALLBACK_HOME} />
   </React.StrictMode>
 );
