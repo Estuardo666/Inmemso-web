@@ -182,8 +182,8 @@ if (process.env.NODE_ENV === 'production') {
 
 export default buildConfig({
 	i18n: {
-		defaultLanguage: 'es',
-		supportedLanguages: {
+		fallbackLanguage: 'es',
+		translations: {
 			es,
 		},
 	},
@@ -208,15 +208,12 @@ export default buildConfig({
 		user: 'users',
 		meta: {
 			title: 'Inmemso Architecture CMS',
-			ogImage: '/thumbnail.jpg',
-		} as any,
+		},
 		components: {
 			graphics: {
 				Logo: '@/components/admin/InmemsoLogo',
 			},
 		},
-		// Attach custom admin CSS (normalize path for Windows)
-		css: path.posix.join(dirname.replace(/\\/g, '/'), 'components/admin/admin.css'),
 		importMap: {
 			baseDir: path.resolve(dirname, 'app/(payload)/admin'),
 		},
@@ -226,9 +223,7 @@ export default buildConfig({
 			slug: 'site-settings',
 			access: {
 				read: () => true,
-				create: () => true,
 				update: () => true,
-				delete: () => true,
 			},
 			fields: [
 				{
@@ -254,9 +249,7 @@ export default buildConfig({
 			slug: 'seo',
 			access: {
 				read: () => true,
-				create: () => true,
 				update: () => true,
-				delete: () => true,
 			},
 			fields: [
 				{ name: 'meta_title', type: 'text', required: true },
@@ -268,9 +261,7 @@ export default buildConfig({
 			slug: 'nosotros',
 			access: {
 				read: () => true,
-				create: () => true,
 				update: () => true,
-				delete: () => true,
 			},
 			fields: [
 				{ name: 'pretitulo1', type: 'text', required: true },
@@ -355,9 +346,7 @@ export default buildConfig({
 				slug: 'home',
 				access: {
 					read: () => true,
-					create: () => true,
 					update: () => true,
-					delete: () => true,
 				},
 				fields: [
 					{
@@ -461,9 +450,7 @@ export default buildConfig({
 				slug: 'cta',
 				access: {
 					read: () => true,
-					create: () => true,
 					update: () => true,
-					delete: () => true,
 				},
 				fields: [
 				{ name: 'background_image', type: 'upload', relationTo: 'media' },

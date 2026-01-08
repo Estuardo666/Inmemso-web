@@ -3,7 +3,7 @@
  * Run this to apply all Payload migrations to the production database
  */
 import { getPayload } from 'payload'
-import config from '../payload.config.js'
+import config from '../../payload.config'
 
 async function runMigrations() {
   console.log('🔄 Iniciando Payload y ejecutando migraciones...\n')

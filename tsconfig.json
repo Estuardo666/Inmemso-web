@@ -51,6 +51,8 @@
     "vite.config.ts",
     "vite.config.mts",
     "vite.config.mjs",
-    "vite.config.js"
+    "vite.config.js",
+    "src/scripts/**/*.ts",
+    "src/data/mockData.ts"
   ]
 }

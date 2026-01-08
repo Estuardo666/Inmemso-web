@@ -41,6 +41,7 @@ async function seedContent() {
 				await payload.create({
 					collection: 'services',
 					data: service,
+					draft: false,
 				})
 				console.log(`  ✓ Servicio creado: ${service.title}`)
 			} else {
@@ -108,6 +109,7 @@ async function seedContent() {
 						} as any,
 						status: 'published',
 					},
+					draft: false,
 				})
 				console.log(`  ✓ Proyecto creado: ${project.title}`)
 			} else {
@@ -144,6 +146,7 @@ async function seedContent() {
 				await payload.create({
 					collection: 'testimonials',
 					data: testimonial,
+					draft: false,
 				})
 				console.log(`  ✓ Testimonial creado: ${testimonial.name}`)
 			} else {
