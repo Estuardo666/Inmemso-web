@@ -19,3 +19,17 @@
 	font-size: 0.95rem;
 	text-transform: uppercase;
 }
+
+/* Dark mode background customization for Payload Admin */
+html[data-theme="dark"],
+html[data-theme="dark"] body {
+  background: rgba(12, 58, 99, 0.9) !important; /* #0c3a63e6 */
+}
+
+/* Ensure login wrapper inherits our dark background without overlays */
+html[data-theme="dark"] .payload-login,
+html[data-theme="dark"] .payload-login__wrap,
+html[data-theme="dark"] .app--wrap,
+html[data-theme="dark"] .template-default__wrap {
+  background: transparent !important;
+}

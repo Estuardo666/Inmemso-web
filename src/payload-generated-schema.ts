@@ -44,6 +44,11 @@ export const users_sessions = pgTable(
       withTimezone: true,
       precision: 3,
     }),
+    updatedAt: timestamp("updated_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
     expiresAt: timestamp("expires_at", {
       mode: "string",
       withTimezone: true,

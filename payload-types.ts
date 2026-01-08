@@ -70,6 +70,7 @@ export interface Config {
     users: User;
     projects: Project;
     services: Service;
+    blog: Blog;
     media: Media;
     testimonials: Testimonial;
     'payload-kv': PayloadKv;
@@ -82,6 +83,7 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
     services: ServicesSelect<false> | ServicesSelect<true>;
+    blog: BlogSelect<false> | BlogSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -95,9 +97,17 @@ export interface Config {
   fallbackLocale: null;
   globals: {
     'site-settings': SiteSetting;
+    seo: Seo;
+    nosotros: Nosotro;
+    home: Home;
+    cta: Cta;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+    seo: SeoSelect<false> | SeoSelect<true>;
+    nosotros: NosotrosSelect<false> | NosotrosSelect<true>;
+    home: HomeSelect<false> | HomeSelect<true>;
+    cta: CtaSelect<false> | CtaSelect<true>;
   };
   locale: null;
   user: User & {
@@ -159,8 +169,10 @@ export interface Project {
   id: string;
   title: string;
   slug: string;
+  category: string;
+  heroImage: string | Media;
   description: string;
-  content: {
+  content?: {
     root: {
       type: string;
       children: {
@@ -174,21 +186,23 @@ export interface Project {
       version: number;
     };
     [k: string]: unknown;
+  } | null;
+  specs: {
+    client: string;
+    location: string;
+    year: string;
+    area: string;
   };
-  featuredImage?: (string | null) | Media;
-  services?:
+  galleryImages?:
     | {
-        service?: string | null;
+        image: string | Media;
         id?: string | null;
       }[]
     | null;
-  technologies?:
-    | {
-        technology?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  year?: string | null;
+  /**
+   * URL del video (YouTube embed URL o video URL)
+   */
+  video?: string | null;
   status?: ('draft' | 'published' | 'archived') | null;
   updatedAt: string;
   createdAt: string;
@@ -219,10 +233,42 @@ export interface Media {
  */
 export interface Service {
   id: string;
-  title: string;
+  pretitulo: string;
+  titulo: string;
   slug: string;
-  description: string;
-  content?: {
+  featured_image: string | Media;
+  titulo2: string;
+  parrafo1: string;
+  parrafo2: string;
+  caracteristicas?: {
+    items?:
+      | {
+          caracteristica: string;
+          imagen: string | Media;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  galeria_visual?:
+    | {
+        imagen: string | Media;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blog".
+ */
+export interface Blog {
+  id: string;
+  titulo: string;
+  slug: string;
+  subtitulo: string;
+  featured_image: string | Media;
+  contenido: {
     root: {
       type: string;
       children: {
@@ -236,9 +282,8 @@ export interface Service {
       version: number;
     };
     [k: string]: unknown;
-  } | null;
-  icon?: string | null;
-  featuredImage?: (string | null) | Media;
+  };
+  status?: ('draft' | 'published' | 'archived') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -291,6 +336,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'services';
         value: string | Service;
+      } | null)
+    | ({
+        relationTo: 'blog';
+        value: string | Blog;
       } | null)
     | ({
         relationTo: 'media';
@@ -372,22 +421,25 @@ export interface UsersSelect<T extends boolean = true> {
 export interface ProjectsSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
+  category?: T;
+  heroImage?: T;
   description?: T;
   content?: T;
-  featuredImage?: T;
-  services?:
+  specs?:
     | T
     | {
-        service?: T;
-        id?: T;
+        client?: T;
+        location?: T;
+        year?: T;
+        area?: T;
       };
-  technologies?:
+  galleryImages?:
     | T
     | {
-        technology?: T;
+        image?: T;
         id?: T;
       };
-  year?: T;
+  video?: T;
   status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -397,12 +449,44 @@ export interface ProjectsSelect<T extends boolean = true> {
  * via the `definition` "services_select".
  */
 export interface ServicesSelect<T extends boolean = true> {
-  title?: T;
+  pretitulo?: T;
+  titulo?: T;
   slug?: T;
-  description?: T;
-  content?: T;
-  icon?: T;
-  featuredImage?: T;
+  featured_image?: T;
+  titulo2?: T;
+  parrafo1?: T;
+  parrafo2?: T;
+  caracteristicas?:
+    | T
+    | {
+        items?:
+          | T
+          | {
+              caracteristica?: T;
+              imagen?: T;
+              id?: T;
+            };
+      };
+  galeria_visual?:
+    | T
+    | {
+        imagen?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blog_select".
+ */
+export interface BlogSelect<T extends boolean = true> {
+  titulo?: T;
+  slug?: T;
+  subtitulo?: T;
+  featured_image?: T;
+  contenido?: T;
+  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -485,6 +569,189 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 export interface SiteSetting {
   id: string;
   primaryColor?: string | null;
+  /**
+   * Logo para modo claro (login/admin header)
+   */
+  adminLogoLight?: (string | null) | Media;
+  /**
+   * Logo para modo oscuro (login/admin header)
+   */
+  adminLogoDark?: (string | null) | Media;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "seo".
+ */
+export interface Seo {
+  id: string;
+  meta_title: string;
+  meta_description: string;
+  favicon?: (string | null) | Media;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nosotros".
+ */
+export interface Nosotro {
+  id: string;
+  pretitulo1: string;
+  titulo: string;
+  subtitulo: string;
+  galeria1?:
+    | {
+        imagen: string | Media;
+        id?: string | null;
+      }[]
+    | null;
+  titulo2: string;
+  parrafo1: string;
+  seccion_pilares: {
+    pretitulo: string;
+    titulo: string;
+    pilares?:
+      | {
+          /**
+           * Selecciona el icono Lucide para este pilar
+           */
+          icono:
+            | 'Heart'
+            | 'Star'
+            | 'Shield'
+            | 'Zap'
+            | 'Target'
+            | 'Compass'
+            | 'HardHat'
+            | 'Building'
+            | 'FileText'
+            | 'Wrench'
+            | 'Settings'
+            | 'Users'
+            | 'Award'
+            | 'TrendingUp'
+            | 'Lightbulb'
+            | 'Rocket'
+            | 'Anchor'
+            | 'PenTool'
+            | 'CheckCircle'
+            | 'Layers';
+          titulo: string;
+          parrafo: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  seccion_equipo: {
+    titulo: string;
+    subtitulo: string;
+    personas?:
+      | {
+          imagen: string | Media;
+          nombre: string;
+          puesto: string;
+          parrafo: string;
+          /**
+           * URLs de redes sociales (opcional)
+           */
+          redes_sociales?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home".
+ */
+export interface Home {
+  id: string;
+  hero: {
+    imagen?: (string | null) | Media;
+    video?: string | null;
+    pretitulo?: string | null;
+    titulo: string;
+    subtitulo?: string | null;
+    parrafo?: string | null;
+    texto_boton_1?: string | null;
+    url_boton_1?: string | null;
+    texto_boton_2?: string | null;
+    url_boton_2?: string | null;
+  };
+  seccion2?: {
+    pretitulo?: string | null;
+    titulo?: string | null;
+    parrafo?: string | null;
+    imagen_pretitulo?: string | null;
+    imagen_titulo?: string | null;
+    imagen_subtitulo?: string | null;
+    items?: {
+      item1?: string | null;
+      item2?: string | null;
+      item3?: string | null;
+      item4?: string | null;
+    };
+    imagen?: (string | null) | Media;
+    texto_boton?: string | null;
+    url_boton?: string | null;
+  };
+  servicios?: {
+    pretitulo?: string | null;
+    titulo?: string | null;
+    subtitulo?: string | null;
+  };
+  soluciones?: {
+    pretitulo?: string | null;
+    titulo?: string | null;
+    parrafo?: string | null;
+  };
+  trayectoria?: {
+    pretitulo?: string | null;
+    titulo?: string | null;
+    items?:
+      | {
+          imagen?: (string | null) | Media;
+          titulo?: string | null;
+          subtitulo?: string | null;
+          parrafo?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  portafolio?: {
+    pretitulo?: string | null;
+    titulo?: string | null;
+    parrafo?: string | null;
+  };
+  logotipos_instituciones?:
+    | {
+        imagen?: (string | null) | Media;
+        nombre?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cta".
+ */
+export interface Cta {
+  id: string;
+  background_image?: (string | null) | Media;
+  pretitulo: string;
+  titulo: string;
+  subtitulo: string;
+  texto_boton: string;
+  /**
+   * URL del botón (ej: /contacto, https://..., #seccion)
+   */
+  enlace_boton: string;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -494,6 +761,172 @@ export interface SiteSetting {
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
   primaryColor?: T;
+  adminLogoLight?: T;
+  adminLogoDark?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "seo_select".
+ */
+export interface SeoSelect<T extends boolean = true> {
+  meta_title?: T;
+  meta_description?: T;
+  favicon?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nosotros_select".
+ */
+export interface NosotrosSelect<T extends boolean = true> {
+  pretitulo1?: T;
+  titulo?: T;
+  subtitulo?: T;
+  galeria1?:
+    | T
+    | {
+        imagen?: T;
+        id?: T;
+      };
+  titulo2?: T;
+  parrafo1?: T;
+  seccion_pilares?:
+    | T
+    | {
+        pretitulo?: T;
+        titulo?: T;
+        pilares?:
+          | T
+          | {
+              icono?: T;
+              titulo?: T;
+              parrafo?: T;
+              id?: T;
+            };
+      };
+  seccion_equipo?:
+    | T
+    | {
+        titulo?: T;
+        subtitulo?: T;
+        personas?:
+          | T
+          | {
+              imagen?: T;
+              nombre?: T;
+              puesto?: T;
+              parrafo?: T;
+              redes_sociales?: T;
+              id?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home_select".
+ */
+export interface HomeSelect<T extends boolean = true> {
+  hero?:
+    | T
+    | {
+        imagen?: T;
+        video?: T;
+        pretitulo?: T;
+        titulo?: T;
+        subtitulo?: T;
+        parrafo?: T;
+        texto_boton_1?: T;
+        url_boton_1?: T;
+        texto_boton_2?: T;
+        url_boton_2?: T;
+      };
+  seccion2?:
+    | T
+    | {
+        pretitulo?: T;
+        titulo?: T;
+        parrafo?: T;
+        imagen_pretitulo?: T;
+        imagen_titulo?: T;
+        imagen_subtitulo?: T;
+        items?:
+          | T
+          | {
+              item1?: T;
+              item2?: T;
+              item3?: T;
+              item4?: T;
+            };
+        imagen?: T;
+        texto_boton?: T;
+        url_boton?: T;
+      };
+  servicios?:
+    | T
+    | {
+        pretitulo?: T;
+        titulo?: T;
+        subtitulo?: T;
+      };
+  soluciones?:
+    | T
+    | {
+        pretitulo?: T;
+        titulo?: T;
+        parrafo?: T;
+      };
+  trayectoria?:
+    | T
+    | {
+        pretitulo?: T;
+        titulo?: T;
+        items?:
+          | T
+          | {
+              imagen?: T;
+              titulo?: T;
+              subtitulo?: T;
+              parrafo?: T;
+              id?: T;
+            };
+      };
+  portafolio?:
+    | T
+    | {
+        pretitulo?: T;
+        titulo?: T;
+        parrafo?: T;
+      };
+  logotipos_instituciones?:
+    | T
+    | {
+        imagen?: T;
+        nombre?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cta_select".
+ */
+export interface CtaSelect<T extends boolean = true> {
+  background_image?: T;
+  pretitulo?: T;
+  titulo?: T;
+  subtitulo?: T;
+  texto_boton?: T;
+  enlace_boton?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

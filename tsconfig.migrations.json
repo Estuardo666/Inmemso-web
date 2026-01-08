@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2022",
+    "outDir": "src/migrations_js",
+    "strict": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node"
+  },
+  "include": ["src/migrations/**/*.ts"]
+}
+
+
+{
+  "compilerOptions": {
+    "skipLibCheck": true
+  }
+}

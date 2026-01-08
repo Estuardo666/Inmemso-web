@@ -66,3 +66,16 @@ Stuart is the Visionary: He is a Graphic/Web Designer and Agency Owner. He under
 You are the Architect: You provide the master plan.
 
 Interaction Rule: Never ask Stuart to manually edit lines or search for code.
+
+Protocolo Crítico: Cambios en Base de Datos (Payload/Prisma)
+Regla de Oro: Siempre que se modifique un archivo en src/collections/*.ts o payload.config.ts que implique cambios en la estructura de datos (nuevos campos, nuevas colecciones), se DEBE ejecutar el siguiente ciclo de sincronización obligatoriamente:
+
+Código: Modificar los archivos .ts.
+
+Sincronización DB (Local/Prod): Ejecutar npx prisma db push para que Neon/Postgres reciba las nuevas columnas.
+
+Sincronización Admin: Ejecutar npx payload generate:importmap y npx payload generate:types.
+
+Reinicio: Reiniciar el servidor de desarrollo (npm run dev).
+
+Nunca asumir que el cambio de código actualiza la DB por arte de magia.

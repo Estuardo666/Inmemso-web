@@ -31,14 +31,15 @@ import ServiceCTA from './components/ServiceCTA';
 import ProjectsArchive from './components/ProjectsArchive';
 import ProjectTemplate from './components/ProjectTemplate';
 
-import type { FrontendProject, FrontendService } from './src/types/content';
+import type { FrontendProject, FrontendService, FrontendHome } from './src/types/content';
 
 type AppProps = {
   services: FrontendService[]
   projects: FrontendProject[]
+  home: FrontendHome
 }
 
-const App: React.FC<AppProps> = ({ services, projects }) => {
+const App: React.FC<AppProps> = ({ services, projects, home }) => {
   const [activePage, setActivePage] = useState<'home' | 'about' | 'service-detail' | 'projects' | 'project-detail'>('home');
   const [activeServiceId, setActiveServiceId] = useState<string>('steel');
   const [activeProjectId, setActiveProjectId] = useState<string>('residencia-altura');
@@ -89,13 +90,13 @@ const App: React.FC<AppProps> = ({ services, projects }) => {
         <main>
           {activePage === 'home' && (
             <>
-              <Hero />
-              <About />
-              <Services />
-              <TechShowcase />
-              <Experience />
-              <Projects />
-              <Clients />
+              <Hero data={home.hero} />
+              <About data={home.seccion2} />
+              <Services services={services} data={home.servicios} />
+              <TechShowcase data={home.soluciones} />
+              <Experience data={home.trayectoria} />
+              <Projects projects={projects} data={home.portafolio} />
+              <Clients data={home.logotipos_instituciones} />
               <CallToAction />
             </>
           )}

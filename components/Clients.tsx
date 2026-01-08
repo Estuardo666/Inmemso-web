@@ -1,18 +1,21 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Building, Landmark, Briefcase } from 'lucide-react';
+import type { FrontendHomeLogotipo } from '@/src/types/content';
 
-const clients = [
-  { name: "Municipio de Quito", icon: Landmark },
-  { name: "Consejo Provincial", icon: Landmark },
-  { name: "Constructora Vial", icon: Briefcase },
-  { name: "Inmobiliaria Futuro", icon: Building },
-  { name: "Municipio de Guayaquil", icon: Landmark },
-  { name: "Constructora Andes", icon: Briefcase },
-  { name: "Gobierno Local", icon: Landmark },
+interface ClientsProps { data: FrontendHomeLogotipo[] }
+
+const fallbackClients = [
+  { nombre: "Municipio de Quito", imagen: undefined },
+  { nombre: "Consejo Provincial", imagen: undefined },
+  { nombre: "Constructora Vial", imagen: undefined },
+  { nombre: "Inmobiliaria Futuro", imagen: undefined },
+  { nombre: "Municipio de Guayaquil", imagen: undefined },
+  { nombre: "Constructora Andes", imagen: undefined },
+  { nombre: "Gobierno Local", imagen: undefined },
 ];
 
-const Clients: React.FC = () => {
+const Clients: React.FC<ClientsProps> = ({ data }) => {
+  const list = (data && data.length ? data : fallbackClients) as any[];
   return (
     <section className="py-20 border-t border-gray-100 bg-white overflow-hidden">
       <div className="container mx-auto px-6 mb-12 text-center">
@@ -33,12 +36,16 @@ const Clients: React.FC = () => {
             ease: "linear",
           }}
         >
-          {[...clients, ...clients, ...clients].map((client, index) => (
+          {[...list, ...list, ...list].map((client, index) => (
             <div key={index} className="flex items-center gap-4 text-primary/60 hover:text-primary transition-colors duration-300 group cursor-pointer">
-              <div className="p-3 rounded-xl border border-primary/10 bg-primary/5 group-hover:border-accent/30 group-hover:bg-accent/10 transition-colors">
-                <client.icon size={32} />
+              <div className="p-3 rounded-xl border border-primary/10 bg-primary/5 group-hover:border-accent/30 group-hover:bg-accent/10 transition-colors w-14 h-14 flex items-center justify-center overflow-hidden">
+                {client.imagen ? (
+                  <img src={client.imagen} alt={client.nombre || 'logo'} className="max-w-full max-h-full object-contain" />
+                ) : (
+                  <div className="w-6 h-6 rounded bg-primary/20" />
+                )}
               </div>
-              <span className="text-xl font-medium tracking-tight">{client.name}</span>
+              <span className="text-xl font-medium tracking-tight">{client.nombre || client.name}</span>
             </div>
           ))}
         </motion.div>

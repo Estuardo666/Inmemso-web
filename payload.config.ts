@@ -7,6 +7,7 @@ import dotenv from 'dotenv'
 import { fileURLToPath } from 'url'
 import { v2 as cloudinarySDK } from 'cloudinary'
 import { migrations } from './src/migrations'
+import { es } from '@payloadcms/translations/languages/es'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -180,6 +181,12 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 export default buildConfig({
+	i18n: {
+		defaultLanguage: 'es',
+		supportedLanguages: {
+			es,
+		},
+	},
 	debug: process.env.PAYLOAD_DEBUG === 'true',
 	hooks: {
 		afterError: [({ error, req, result }) => {
@@ -208,6 +215,8 @@ export default buildConfig({
 				Logo: '@/components/admin/InmemsoLogo',
 			},
 		},
+		// Attach custom admin CSS (normalize path for Windows)
+		css: path.posix.join(dirname.replace(/\\/g, '/'), 'components/admin/admin.css'),
 		importMap: {
 			baseDir: path.resolve(dirname, 'app/(payload)/admin'),
 		},
@@ -215,12 +224,254 @@ export default buildConfig({
 	globals: [
 		{
 			slug: 'site-settings',
+			access: {
+				read: () => true,
+				create: () => true,
+				update: () => true,
+				delete: () => true,
+			},
 			fields: [
 				{
 					name: 'primaryColor',
 					type: 'text',
 					defaultValue: '#1a1a1a',
 				},
+				{
+					name: 'adminLogoLight',
+					type: 'upload',
+					relationTo: 'media',
+					admin: { description: 'Logo para modo claro (login/admin header)' },
+				},
+				{
+					name: 'adminLogoDark',
+					type: 'upload',
+					relationTo: 'media',
+					admin: { description: 'Logo para modo oscuro (login/admin header)' },
+				},
+			],
+		},
+		{
+			slug: 'seo',
+			access: {
+				read: () => true,
+				create: () => true,
+				update: () => true,
+				delete: () => true,
+			},
+			fields: [
+				{ name: 'meta_title', type: 'text', required: true },
+				{ name: 'meta_description', type: 'textarea', required: true },
+				{ name: 'favicon', type: 'upload', relationTo: 'media' },
+			],
+		},
+		{
+			slug: 'nosotros',
+			access: {
+				read: () => true,
+				create: () => true,
+				update: () => true,
+				delete: () => true,
+			},
+			fields: [
+				{ name: 'pretitulo1', type: 'text', required: true },
+				{ name: 'titulo', type: 'text', required: true },
+				{ name: 'subtitulo', type: 'text', required: true },
+				{
+					name: 'galeria1',
+					type: 'array',
+					fields: [
+						{ name: 'imagen', type: 'upload', relationTo: 'media', required: true },
+					],
+					maxRows: 4,
+				},
+				{ name: 'titulo2', type: 'text', required: true },
+				{ name: 'parrafo1', type: 'textarea', required: true },
+				{
+					name: 'seccion_pilares',
+					type: 'group',
+					fields: [
+						{ name: 'pretitulo', type: 'text', required: true },
+						{ name: 'titulo', type: 'text', required: true },
+						{
+							name: 'pilares',
+							type: 'array',
+							fields: [
+								{ 
+									name: 'icono', 
+									type: 'select', 
+									required: true,
+									options: [
+										{ label: 'Corazón (Heart)', value: 'Heart' },
+										{ label: 'Estrella (Star)', value: 'Star' },
+										{ label: 'Escudo (Shield)', value: 'Shield' },
+										{ label: 'Rayo (Zap)', value: 'Zap' },
+										{ label: 'Objetivo (Target)', value: 'Target' },
+										{ label: 'Brújula (Compass)', value: 'Compass' },
+										{ label: 'Construcción (HardHat)', value: 'HardHat' },
+										{ label: 'Edificio (Building)', value: 'Building' },
+										{ label: 'Plano (FileText)', value: 'FileText' },
+										{ label: 'Herramientas (Wrench)', value: 'Wrench' },
+										{ label: 'Engranaje (Settings)', value: 'Settings' },
+										{ label: 'Usuario (Users)', value: 'Users' },
+										{ label: 'Certificado (Award)', value: 'Award' },
+										{ label: 'Gráfica (TrendingUp)', value: 'TrendingUp' },
+										{ label: 'Lightbulb (Bombilla)', value: 'Lightbulb' },
+										{ label: 'Cohete (Rocket)', value: 'Rocket' },
+										{ label: 'Ancla (Anchor)', value: 'Anchor' },
+										{ label: 'Lápiz (PenTool)', value: 'PenTool' },
+										{ label: 'Check (CheckCircle)', value: 'CheckCircle' },
+										{ label: 'Capas (Layers)', value: 'Layers' },
+									],
+									admin: { description: 'Selecciona el icono Lucide para este pilar' }
+								},
+								{ name: 'titulo', type: 'text', required: true },
+								{ name: 'parrafo', type: 'textarea', required: true },
+							],
+						},
+					],
+				},
+				{
+					name: 'seccion_equipo',
+					type: 'group',
+					fields: [
+						{ name: 'titulo', type: 'text', required: true },
+						{ name: 'subtitulo', type: 'text', required: true },
+						{
+							name: 'personas',
+							type: 'array',
+							fields: [
+								{ name: 'imagen', type: 'upload', relationTo: 'media', required: true },
+								{ name: 'nombre', type: 'text', required: true },
+								{ name: 'puesto', type: 'text', required: true },
+								{ name: 'parrafo', type: 'textarea', required: true },
+								{ name: 'redes_sociales', type: 'textarea', admin: { description: 'URLs de redes sociales (opcional)' } },
+							],
+						},
+					],
+				},
+			],
+		},
+			{
+				slug: 'home',
+				access: {
+					read: () => true,
+					create: () => true,
+					update: () => true,
+					delete: () => true,
+				},
+				fields: [
+					{
+						name: 'hero',
+						type: 'group',
+						fields: [
+							{ name: 'imagen', type: 'upload', relationTo: 'media' },
+							{ name: 'video', type: 'text' },
+							{ name: 'pretitulo', type: 'text' },
+							{ name: 'titulo', type: 'text', required: true },
+							{ name: 'subtitulo', type: 'text' },
+							{ name: 'parrafo', type: 'textarea' },
+							{ name: 'texto_boton_1', type: 'text' },
+							{ name: 'url_boton_1', type: 'text' },
+							{ name: 'texto_boton_2', type: 'text' },
+							{ name: 'url_boton_2', type: 'text' },
+						],
+					},
+					{
+						name: 'seccion2',
+						type: 'group',
+						fields: [
+							{ name: 'pretitulo', type: 'text' },
+							{ name: 'titulo', type: 'text' },
+							{ name: 'parrafo', type: 'textarea' },
+							// Contenido del card flotante sobre la imagen
+							{ name: 'imagen_pretitulo', type: 'text' },
+							{ name: 'imagen_titulo', type: 'text' },
+							{ name: 'imagen_subtitulo', type: 'text' },
+							{
+								name: 'items',
+								type: 'group',
+								fields: [
+									{ name: 'item1', type: 'text' },
+									{ name: 'item2', type: 'text' },
+									{ name: 'item3', type: 'text' },
+									{ name: 'item4', type: 'text' },
+								],
+							},
+							{ name: 'imagen', type: 'upload', relationTo: 'media' },
+							{ name: 'texto_boton', type: 'text' },
+							{ name: 'url_boton', type: 'text' },
+						],
+					},
+					{
+						name: 'servicios',
+						type: 'group',
+						fields: [
+							{ name: 'pretitulo', type: 'text' },
+							{ name: 'titulo', type: 'text' },
+							{ name: 'subtitulo', type: 'text' },
+						],
+					},
+					{
+						name: 'soluciones',
+						type: 'group',
+						fields: [
+							{ name: 'pretitulo', type: 'text' },
+							{ name: 'titulo', type: 'text' },
+							{ name: 'parrafo', type: 'textarea' },
+						],
+					},
+					{
+						name: 'trayectoria',
+						type: 'group',
+						fields: [
+							{ name: 'pretitulo', type: 'text' },
+							{ name: 'titulo', type: 'text' },
+							{
+								name: 'items',
+								type: 'array',
+								fields: [
+									{ name: 'imagen', type: 'upload', relationTo: 'media' },
+									{ name: 'titulo', type: 'text' },
+									{ name: 'subtitulo', type: 'text' },
+									{ name: 'parrafo', type: 'textarea' },
+								],
+							},
+						],
+					},
+					{
+						name: 'portafolio',
+						type: 'group',
+						fields: [
+							{ name: 'pretitulo', type: 'text' },
+							{ name: 'titulo', type: 'text' },
+							{ name: 'parrafo', type: 'textarea' },
+						],
+					},
+					{
+						name: 'logotipos_instituciones',
+						type: 'array',
+						fields: [
+							{ name: 'imagen', type: 'upload', relationTo: 'media' },
+							{ name: 'nombre', type: 'text' },
+						],
+					},
+				],
+			},
+			{
+				slug: 'cta',
+				access: {
+					read: () => true,
+					create: () => true,
+					update: () => true,
+					delete: () => true,
+				},
+				fields: [
+				{ name: 'background_image', type: 'upload', relationTo: 'media' },
+				{ name: 'pretitulo', type: 'text', required: true },
+				{ name: 'titulo', type: 'text', required: true },
+				{ name: 'subtitulo', type: 'text', required: true },
+				{ name: 'texto_boton', type: 'text', required: true },
+				{ name: 'enlace_boton', type: 'text', required: true, admin: { description: 'URL del botón (ej: /contacto, https://..., #seccion)' } },
 			],
 		},
 	],
@@ -246,23 +497,41 @@ export default buildConfig({
 			access: {
 				read: () => true,
 			},
+			admin: {
+				useAsTitle: 'title',
+				defaultColumns: ['title', 'category', 'year', 'updatedAt'],
+			},
 			fields: [
 				{ name: 'title', type: 'text', required: true },
 				{ name: 'slug', type: 'text', required: true, unique: true },
+				{ name: 'category', type: 'text', required: true },
+				{ name: 'heroImage', type: 'upload', relationTo: 'media', required: true },
 				{ name: 'description', type: 'textarea', required: true },
-				{ name: 'content', type: 'richText', required: true },
-				{ name: 'featuredImage', type: 'upload', relationTo: 'media' },
+				{ name: 'content', type: 'richText' },
 				{
-					name: 'services',
-					type: 'array',
-					fields: [{ name: 'service', type: 'text' }],
+					name: 'specs',
+					type: 'group',
+					fields: [
+						{ name: 'client', type: 'text', required: true },
+						{ name: 'location', type: 'text', required: true },
+						{ name: 'year', type: 'text', required: true },
+						{ name: 'area', type: 'text', required: true },
+					],
 				},
 				{
-					name: 'technologies',
+					name: 'galleryImages',
 					type: 'array',
-					fields: [{ name: 'technology', type: 'text' }],
+					fields: [
+						{ name: 'image', type: 'upload', relationTo: 'media', required: true },
+					],
 				},
-				{ name: 'year', type: 'text' },
+				{
+					name: 'video',
+					type: 'text',
+					admin: {
+						description: 'URL del video (YouTube embed URL o video URL)',
+					},
+				},
 				{
 					name: 'status',
 					type: 'select',
@@ -276,13 +545,64 @@ export default buildConfig({
 			access: {
 				read: () => true,
 			},
+			admin: {
+				useAsTitle: 'titulo',
+				defaultColumns: ['titulo', 'slug', 'updatedAt'],
+			},
 			fields: [
-				{ name: 'title', type: 'text', required: true },
+				{ name: 'pretitulo', type: 'text', required: true },
+				{ name: 'titulo', type: 'text', required: true },
 				{ name: 'slug', type: 'text', required: true, unique: true },
-				{ name: 'description', type: 'textarea', required: true },
-				{ name: 'content', type: 'richText' },
-				{ name: 'icon', type: 'text' },
-				{ name: 'featuredImage', type: 'upload', relationTo: 'media' },
+				{ name: 'featured_image', type: 'upload', relationTo: 'media', required: true },
+				{ name: 'titulo2', type: 'text', required: true },
+				{ name: 'parrafo1', type: 'textarea', required: true },
+				{ name: 'parrafo2', type: 'textarea', required: true },
+				{
+					name: 'caracteristicas',
+					type: 'group',
+					fields: [
+						{
+							name: 'items',
+							type: 'array',
+							fields: [
+								{ name: 'caracteristica', type: 'text', required: true },
+								{ name: 'imagen', type: 'upload', relationTo: 'media', required: true },
+							],
+							minRows: 4,
+							maxRows: 4,
+						},
+					],
+				},
+				{
+					name: 'galeria_visual',
+					type: 'array',
+					fields: [
+						{ name: 'imagen', type: 'upload', relationTo: 'media', required: true },
+					],
+				},
+			],
+		},
+		{
+			slug: 'blog',
+			access: {
+				read: () => true,
+			},
+			admin: {
+				useAsTitle: 'titulo',
+				defaultColumns: ['titulo', 'subtitulo', 'updatedAt'],
+			},
+			fields: [
+				{ name: 'titulo', type: 'text', required: true },
+				{ name: 'slug', type: 'text', required: true, unique: true },
+				{ name: 'subtitulo', type: 'text', required: true },
+				{ name: 'featured_image', type: 'upload', relationTo: 'media', required: true },
+				{ name: 'contenido', type: 'richText', required: true },
+				{
+					name: 'status',
+					type: 'select',
+					options: ['draft', 'published', 'archived'],
+					defaultValue: 'draft',
+				},
 			],
 		},
 		{
@@ -387,9 +707,9 @@ export default buildConfig({
 	editor: lexicalEditor({}),
 	db: postgresAdapter({
 		idType: 'uuid',
-		// CRITICAL: Always use migrations, never push: true (which drops/recreates tables)
-		// This prevents data loss and allows explicit control over schema changes
-		push: false,
+		// TEMPORARY: push: true for local dev to auto-sync schema
+		// Set to false in production to use migrations
+		push: process.env.NODE_ENV !== 'production',
 		// Always apply migrations in both dev and production
 		// Migrations are idempotent and safe to run multiple times
 		prodMigrations: migrations,

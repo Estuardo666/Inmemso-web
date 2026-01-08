@@ -1,9 +1,14 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { getSEO } from '@/src/lib/getPayloadContent'
 
-export const metadata: Metadata = {
-  title: 'Inmemso Architecture',
-  description: 'Inmemso Architecture - Ingeniería sismorresistente y paneles prefabricados',
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getSEO()
+  return {
+    title: seo.title,
+    description: seo.description,
+    icons: seo.favicon ? { icon: seo.favicon } : undefined,
+  }
 }
 
 export default function RootLayout({
@@ -12,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <body>
         {children}
       </body>

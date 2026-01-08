@@ -9,7 +9,14 @@ const __dirname = path.dirname(__filename)
 const nextConfig = {
   outputFileTracingRoot: __dirname,
   images: {
-    domains: ['localhost'],
+    domains: ['localhost', 'res.cloudinary.com'],
+  },
+  // Configure Turbopack (replaces deprecated experimental.turbo)
+  turbopack: {
+    resolveAlias: {
+      // Use project-relative POSIX path to avoid Windows absolute path issues
+      '@payload-config': './payload.config.ts',
+    },
   },
 
   // Payload Admin pulls in some dependencies that import CSS from node_modules.
@@ -22,26 +29,11 @@ const nextConfig = {
     'react-image-crop',
   ],
 
-  webpack: (config) => {
-    config.resolve = config.resolve || {}
-    config.resolve.alias = {
-      ...(config.resolve.alias || {}),
-      '@payload-config': path.resolve(__dirname, 'payload.config.ts'),
-    }
-
-    // Payload ships a dynamic require in its job runner. Webpack warns about it,
-    // but it is expected and safe to ignore for Next builds.
-    config.ignoreWarnings = [
-      ...(config.ignoreWarnings || []),
-      {
-        message:
-          /Critical dependency: the request of a dependency is an expression/i,
-        module:
-          /payload[\\/]dist[\\/]queues[\\/]operations[\\/]runJobs[\\/]runJob[\\/]importHandlerPath\.js/i,
-      },
-    ]
-
-    return config
+  experimental: {
+    // Server Actions configuration lives under experimental in Next 15
+    serverActions: {
+      bodySizeLimit: '50mb',
+    },
   },
 }
 

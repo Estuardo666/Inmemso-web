@@ -1,14 +1,25 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle2, ArrowRight } from 'lucide-react';
+import type { FrontendHomeSeccion2 } from '../src/types/content';
 
-const About: React.FC = () => {
-  const benefits = [
-    "Sin Intermediarios",
-    "Cobertura Nacional",
-    "Tecnología Sismorresistente",
-    "Entrega Llave en Mano"
-  ];
+interface AboutProps {
+  data: FrontendHomeSeccion2
+}
+
+const About: React.FC<AboutProps> = ({ data }) => {
+  const benefits = data?.items
+    ? Object.values(data.items).filter((item) => typeof item === 'string' && item.trim())
+    : [
+        "Sin Intermediarios",
+        "Cobertura Nacional",
+        "Tecnología Sismorresistente",
+        "Entrega Llave en Mano"
+      ];
+
+  if (typeof window !== 'undefined') {
+    console.log('[About] Rendered with data:', data);
+  }
 
   return (
     <section id="about" className="py-32 bg-white relative overflow-hidden">
@@ -24,7 +35,7 @@ const About: React.FC = () => {
               className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/5 border border-primary/10 mb-8"
             >
               <span className="text-xs font-bold tracking-widest text-primary uppercase">
-                POR QUÉ ELEGIRNOS
+                {data?.pretitulo || 'POR QUÉ ELEGIRNOS'}
               </span>
             </motion.div>
 
@@ -34,7 +45,7 @@ const About: React.FC = () => {
               viewport={{ once: true }}
               className="font-display text-4xl md:text-5xl lg:text-6xl text-primary font-extrabold mb-8 tracking-wide leading-tight"
             >
-              Arquitectura Integral con <span className="text-accent">Infraestructura Propia</span>
+              {data?.titulo || 'Arquitectura Integral con Infraestructura Propia'}
             </motion.h2>
 
             <motion.div
@@ -45,10 +56,7 @@ const About: React.FC = () => {
               className="space-y-6 text-lg text-secondary/80 leading-relaxed"
             >
               <p>
-                En un mercado saturado de intermediarios, Inmemso marca la diferencia. Somos una firma liderada por arquitectos que entiende la obra como un todo. No solo diseñamos visiones estéticas; poseemos la ingeniería industrial para materializarlas.
-              </p>
-              <p>
-                Nuestra mayor fortaleza es la autonomía. Contamos con planta propia para la fabricación de paneles sismorresistentes y armado de vigas de acero. Esta capacidad instalada nos permite desplegar proyectos en cualquier provincia del Ecuador con una velocidad de montaje y precisión que la construcción tradicional no puede igualar.
+                {data?.parrafo || 'En un mercado saturado de intermediarios, Inmemso marca la diferencia. Somos una firma liderada por arquitectos que entiende la obra como un todo. No solo diseñamos visiones estéticas; poseemos la ingeniería industrial para materializarlas.'}
               </p>
             </motion.div>
 
@@ -70,9 +78,14 @@ const About: React.FC = () => {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                if (data?.url_boton) {
+                  window.location.href = data.url_boton;
+                }
+              }}
               className="glass-btn !bg-accent !border-accent flex items-center gap-3 px-8 py-4 rounded-full text-white font-bold text-sm tracking-wide shadow-xl hover:shadow-2xl transition-all"
             >
-              CONOCER INFRAESTRUCTURA
+              {data?.texto_boton || 'CONOCER INFRAESTRUCTURA'}
               <ArrowRight size={18} />
             </motion.button>
           </div>
@@ -87,7 +100,7 @@ const About: React.FC = () => {
           >
             <div className="relative rounded-[3rem] overflow-hidden shadow-2xl h-[600px]">
               <img 
-                src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=2670&auto=format&fit=crop" 
+                src={data?.imagen || "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=2670&auto=format&fit=crop"} 
                 alt="Construction Site" 
                 className="w-full h-full object-cover"
               />
@@ -95,10 +108,10 @@ const About: React.FC = () => {
               {/* Floating Glass Card - DARK BLUE BACKGROUND */}
               <div className="absolute bottom-8 left-8 right-8 p-8 rounded-3xl bg-primary/90 backdrop-blur-xl border border-white/10 shadow-lg text-white">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-accent">Capacidad Industrial</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-accent">{data?.imagen_pretitulo || 'Capacidad Industrial'}</span>
                 </div>
-                <p className="text-2xl font-display font-bold mb-1">100% Control de Calidad</p>
-                <p className="text-sm text-white/80">Desde la fábrica hasta el montaje final.</p>
+                <p className="text-2xl font-display font-bold mb-1">{data?.imagen_titulo || '100% Control de Calidad'}</p>
+                <p className="text-sm text-white/80">{data?.imagen_subtitulo || 'Desde la fábrica hasta el montaje final.'}</p>
               </div>
             </div>
             

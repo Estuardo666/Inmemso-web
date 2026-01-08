@@ -1,14 +1,28 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowDown } from 'lucide-react';
+import type { FrontendHomeHero } from '@/src/types/content';
 
-const Hero: React.FC = () => {
+interface HeroProps {
+  data: FrontendHomeHero
+}
+
+const Hero: React.FC<HeroProps> = ({ data }) => {
+  // Los datos ya vienen mergeados con fallback desde getPayloadContent.ts
+  // Ya no necesitamos fallback aquí
+  const heroData = data
+
+  // Debug logging (remover después)
+  if (typeof window !== 'undefined') {
+    console.log('[Hero] Rendered with data:', heroData)
+  }
+
   return (
     <section className="relative w-full h-screen overflow-hidden flex items-center justify-center">
       {/* Background with clearer image */}
       <div className="absolute inset-0 w-full h-full z-0">
         <img
-          src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2670&auto=format&fit=crop"
+          src={heroData.imagen || "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2670&auto=format&fit=crop"}
           alt="Modern Architecture"
           className="w-full h-full object-cover"
         />
@@ -29,7 +43,7 @@ const Hero: React.FC = () => {
         >
           <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-xl shadow-lg">
             <span className="text-sm font-bold tracking-widest text-white uppercase drop-shadow-md">
-              Ingeniería que Trasciende
+              {heroData.pretitulo}
             </span>
           </div>
         </motion.div>
@@ -41,9 +55,9 @@ const Hero: React.FC = () => {
           transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
           className="font-display text-6xl md:text-8xl lg:text-9xl text-white tracking-tighter leading-[0.9] mb-8 drop-shadow-2xl font-extrabold"
         >
-          INMEMSO
+          {heroData.titulo}
           <span className="block font-sans text-2xl md:text-4xl lg:text-5xl font-light text-white/90 mt-6 tracking-normal drop-shadow-lg">
-            Arquitectura Integral & Ingeniería Industrializada
+            {heroData.subtitulo}
           </span>
         </motion.h1>
 
@@ -53,7 +67,7 @@ const Hero: React.FC = () => {
           transition={{ duration: 1, delay: 0.6 }}
           className="text-lg md:text-2xl text-white/95 font-medium max-w-2xl mx-auto leading-relaxed mb-12 drop-shadow-lg"
         >
-          Creamos estructuras que desafían lo convencional. Precisión milimétrica en acero, diseño atemporal en concreto.
+          {heroData.parrafo}
         </motion.p>
 
         {/* Buttons - Liquid Glass */}
@@ -63,13 +77,13 @@ const Hero: React.FC = () => {
           transition={{ duration: 0.8, delay: 0.8 }}
           className="flex flex-col md:flex-row justify-center gap-6"
         >
-          <button className="glass-btn px-10 py-5 rounded-full text-white text-base font-bold tracking-tight">
-            Ver Proyectos
-          </button>
+          <a href={heroData.url_boton_1 || '#'} className="glass-btn px-10 py-5 rounded-full text-white text-base font-bold tracking-tight inline-block">
+            {heroData.texto_boton_1 || 'Ver Proyectos'}
+          </a>
           
-          <button className="glass-btn px-10 py-5 rounded-full text-white text-base font-bold tracking-tight">
-            Contáctanos
-          </button>
+          <a href={heroData.url_boton_2 || '#'} className="glass-btn px-10 py-5 rounded-full text-white text-base font-bold tracking-tight inline-block">
+            {heroData.texto_boton_2 || 'Contáctanos'}
+          </a>
         </motion.div>
       </div>
 

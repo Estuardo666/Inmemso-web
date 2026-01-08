@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, Box, Hammer, Building2 } from 'lucide-react';
+import type { FrontendHomeSoluciones } from '@/src/types/content';
 
 const techFeatures = [
   {
@@ -26,7 +27,9 @@ const techFeatures = [
   }
 ];
 
-const TechShowcase: React.FC = () => {
+interface TechShowcaseProps { data: FrontendHomeSoluciones }
+
+const TechShowcase: React.FC<TechShowcaseProps> = ({ data }) => {
   const [activeFeature, setActiveFeature] = useState(0);
 
   return (
@@ -42,7 +45,7 @@ const TechShowcase: React.FC = () => {
             className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-md mb-6"
           >
             <span className="text-xs font-bold tracking-widest text-accent uppercase">
-              Innovación
+              {data?.pretitulo || 'Innovación'}
             </span>
           </motion.div>
 
@@ -52,7 +55,8 @@ const TechShowcase: React.FC = () => {
             viewport={{ once: true }}
             className="font-display text-4xl md:text-6xl text-white font-extrabold mb-6 tracking-wide"
           >
-            Soluciones <span className="text-accent">Especializadas</span>
+            {(data?.titulo || 'Soluciones Especializadas').split(' ').slice(0,1).join(' ')}{' '}
+            <span className="text-accent">{(data?.titulo || 'Soluciones Especializadas').split(' ').slice(1).join(' ')}</span>
           </motion.h2>
 
           <motion.p
@@ -62,8 +66,7 @@ const TechShowcase: React.FC = () => {
             transition={{ delay: 0.2 }}
             className="text-lg text-white/70 leading-relaxed"
           >
-            Nuestra metodología constructiva integra tecnología de punta con procesos artesanales refinados. 
-            Cada componente es tratado con rigor industrial para garantizar durabilidad y estética superior.
+            {data?.parrafo || 'Nuestra metodología constructiva integra tecnología de punta con procesos artesanales refinados. Cada componente es tratado con rigor industrial para garantizar durabilidad y estética superior.'}
           </motion.p>
         </div>
 

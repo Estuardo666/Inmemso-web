@@ -1,4 +1,4 @@
-import type { FrontendProject, FrontendService } from '@/src/types/content'
+import type { FrontendProject, FrontendService, FrontendHome } from '@/src/types/content'
 
 // Fallback “silencioso”: estos son los mocks que antes estaban embebidos en App.tsx.
 // Se mantienen como baseline para no romper la UI si la API/CMS aún no tiene todos los campos.
@@ -236,3 +236,98 @@ export const FALLBACK_PROJECTS: FrontendProject[] = [
     ],
   },
 ]
+
+// Fallback SEO config: ensures the site has metadata even if CMS is down
+export const FALLBACK_SEO = {
+  title: 'Inmemso Architecture',
+  description:
+    'Inmemso Architecture - Ingeniería sismorresistente y paneles prefabricados',
+  favicon: '/favicon.ico',
+}
+// Fallback HOME singleton: baseline data for home page
+export const FALLBACK_HOME: FrontendHome = {
+  hero: {
+    pretitulo: 'Ingeniería que trasciende',
+    titulo: 'INMEMSO',
+    subtitulo: 'Arquitectura Integral & Ingeniería Industrializada',
+    parrafo:
+      'Creamos estructuras que desafían lo convencional. Precisión milimétrica en acero, diseño atemporal en concreto.',
+    texto_boton_1: 'Ver Proyectos',
+    url_boton_1: '#portafolio',
+    texto_boton_2: 'Contáctanos',
+    url_boton_2: '#contacto',
+    imagen:
+      'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2670&auto=format&fit=crop',
+  },
+  seccion2: {
+    pretitulo: 'Por qué elegimos',
+    titulo: 'Arquitectura Integral con Infraestructura Propia',
+    parrafo:
+      'En un mercado saturado de intermediarios, Inmemso marca la diferencia. Somos una firma liderada por arquitectos que entienden la obra como un todo. No solo diseñamos visiones estéticas; poseemos la ingeniería industrial para materializarlas.',
+    items: {
+      item1: 'Sin intermediarios',
+      item2: 'Cobertura nacional',
+      item3: 'Tecnología sismorresistente',
+      item4: 'Entrega llave en mano',
+    },
+    imagen:
+      'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?q=80&w=2670&auto=format&fit=crop',
+    imagen_pretitulo: 'Capacidad Industrial',
+    imagen_titulo: '100% Control de Calidad',
+    imagen_subtitulo: 'Desde la fábrica hasta el montaje final.',
+    texto_boton: 'Conocer infraestructura',
+    url_boton: '#servicios',
+  },
+  servicios: {
+    pretitulo: 'Lo que hacemos',
+    titulo: 'Servicios Integrales',
+    subtitulo: 'Soluciones completas desde la conceptualización hasta el último detalle constructivo.',
+  },
+  soluciones: {
+    pretitulo: 'Innovación',
+    titulo: 'Soluciones Especializadas',
+    parrafo:
+      'Nuestra metodología constructiva integra tecnología de punta con procesos artesanales refinados. Cada componente es tratado con rigor industrial para garantizar durabilidad y estética superior.',
+  },
+  trayectoria: {
+    pretitulo: 'Trayectoria',
+    titulo: 'Nuestra Experiencia',
+    items: [
+      {
+        titulo: 'Residencias Premium',
+        subtitulo: 'Lujo & Sostenibilidad',
+        parrafo: 'Proyectos de vivienda de alta gama con certificación sismorresistente.',
+        imagen:
+          'https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=2670&auto=format&fit=crop',
+      },
+      {
+        titulo: 'Infraestructura Pública',
+        subtitulo: 'Impacto Social',
+        parrafo: 'Obras civiles que transforman comunidades con precisión e integridad.',
+        imagen:
+          'https://images.unsplash.com/photo-1568605114967-8130f3a36994?q=80&w=2670&auto=format&fit=crop',
+      },
+      {
+        titulo: 'Complejos Comerciales',
+        subtitulo: 'Escalabilidad',
+        parrafo: 'Centros comerciales y oficinas diseñadas para máxima funcionalidad.',
+        imagen:
+          'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=2670&auto=format&fit=crop',
+      },
+    ],
+  },
+  portafolio: {
+    pretitulo: 'Portafolio',
+    titulo: 'Proyectos Destacados',
+    parrafo:
+      'Una colección curada de obras donde la precisión de la ingeniería y la visión arquitectónica convergen.',
+  },
+  logotipos_instituciones: [
+    { nombre: 'Municipio de Quito' },
+    { nombre: 'Consejo Provincial' },
+    { nombre: 'Constructora Vial' },
+    { nombre: 'Inmobiliaria Futuro' },
+    { nombre: 'Municipio de Guayaquil' },
+    { nombre: 'Constructora Andes' },
+  ],
+}
