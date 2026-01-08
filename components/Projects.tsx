@@ -63,11 +63,6 @@ const Projects: React.FC<ProjectsProps> = ({ projects, data }) => {
             // Cycle through height classes for visual variety
             const heightClass = heightClasses[index % heightClasses.length];
             
-            // Handle heroImage - can be string URL or Media object from Payload
-            const imageUrl = typeof project.heroImage === 'string' 
-              ? project.heroImage 
-              : project.heroImage?.url || '';
-            
             return (
               <motion.div
                 key={project.id}
@@ -78,7 +73,7 @@ const Projects: React.FC<ProjectsProps> = ({ projects, data }) => {
                 className={`relative group rounded-[2.5rem] overflow-hidden cursor-pointer break-inside-avoid ${heightClass}`}
               >
                 <img 
-                  src={imageUrl} 
+                  src={project.heroImage} 
                   alt={project.title} 
                   className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                 />
