@@ -694,11 +694,10 @@ export default buildConfig({
 	editor: lexicalEditor({}),
 	db: postgresAdapter({
 		idType: 'uuid',
-		// CRITICAL: Always use false in production to prevent interactive prompts
-		// For local dev, use migrations workflow instead of push
-		push: false,
-		// Always apply migrations in both dev and production
-		// Migrations are idempotent and safe to run multiple times
+		// CRITICAL: Use push: true in Vercel to auto-sync schema without prompts
+		// In serverless (no STDIN), push mode will apply changes automatically
+		push: isVercel ? true : false,
+		// Fallback: migrations for local dev
 		prodMigrations: migrations,
 		// Normalized migration directory path for ESM + Windows compatibility
 		migrationDir: path.resolve(dirname, 'src', 'migrations'),
