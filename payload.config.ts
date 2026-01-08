@@ -694,9 +694,9 @@ export default buildConfig({
 	editor: lexicalEditor({}),
 	db: postgresAdapter({
 		idType: 'uuid',
-		// TEMPORARY: push: true for local dev to auto-sync schema
-		// Set to false in production to use migrations
-		push: process.env.NODE_ENV !== 'production',
+		// Use push in local dev for rapid schema changes
+		// Use migrations in production for safe, versioned changes
+		push: process.env.NODE_ENV === 'development',
 		// Always apply migrations in both dev and production
 		// Migrations are idempotent and safe to run multiple times
 		prodMigrations: migrations,

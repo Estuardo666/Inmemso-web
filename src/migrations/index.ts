@@ -4,6 +4,7 @@ import * as migration_20260105_212900_fix_payload_preferences_rels from './20260
 import * as migration_20260106_113818 from './20260106_113818';
 import * as migration_20260107_000000_ensure_users_sessions_updated_at from './20260107_000000_ensure_users_sessions_updated_at';
 import * as migration_20260107_fix_sessions_defaults from './20260107_fix_sessions_defaults';
+import * as migration_20260108_205146 from './20260108_205146';
 
 export const migrations = [
   {
@@ -24,16 +25,21 @@ export const migrations = [
   {
     up: migration_20260106_113818.up,
     down: migration_20260106_113818.down,
-    name: '20260106_113818'
+    name: '20260106_113818',
   },
   {
     up: migration_20260107_000000_ensure_users_sessions_updated_at.up,
     down: migration_20260107_000000_ensure_users_sessions_updated_at.down,
-    name: '20260107_000000_ensure_users_sessions_updated_at'
+    name: '20260107_000000_ensure_users_sessions_updated_at',
   },
   {
     up: migration_20260107_fix_sessions_defaults.up,
     down: migration_20260107_fix_sessions_defaults.down,
-    name: '20260107_fix_sessions_defaults'
+    name: '20260107_fix_sessions_defaults',
+  },
+  {
+    up: migration_20260108_205146.up,
+    down: migration_20260108_205146.down,
+    name: '20260108_205146'
   },
 ];
